@@ -9,14 +9,17 @@ import (
 type Script string
 
 type Step struct {
-	Name      string `yaml:"name"`
-	Condition string `yaml:"condition"`
-	Script    Script `yaml:"script"`
+	Name      string            `yaml:"name"`
+	Condition string            `yaml:"condition"`
+	Variables map[string]string `yaml:"variables"`
+	// ContinueOnError bool     `yaml:"continueOnError`
+	Script Script `yaml:"script"`
 }
 
 type Pipeline struct {
-	Name  string `yaml:"name"`
-	Steps []Step `yaml:"steps"`
+	Name      string            `yaml:"name"`
+	Variables map[string]string `yaml:"variables"`
+	Steps     []Step            `yaml:"steps"`
 }
 
 // Given a filepath, parse the file into a Pipeline object

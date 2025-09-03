@@ -16,6 +16,10 @@ func NewRunner() (*Runner, error) {
 
 // Runs the passed in pipeline
 func (r *Runner) Run(p pipeline.Pipeline) error {
+
+	// get environment variables from pipeline
+	envVars := parseVariables(p.Variables)
+
 	// Run each step in the pipeline
 	for _, step := range p.Steps {
 		run, err := canRunStep(step)
@@ -29,8 +33,10 @@ func (r *Runner) Run(p pipeline.Pipeline) error {
 			continue
 		}
 
+		localVars := parseVariables(step.Variables)
+
 		fmt.Printf("===== Executing Step [%v] =====\n", step.Name)
-		err = executeScript(step.Script)
+		err = executeScript(step.Script, append(envVars, localVars...))
 		if err != nil {
 			return err
 		}
@@ -45,11 +51,21 @@ func canRunStep(s pipeline.Step) (bool, error) {
 	return true, nil
 }
 
+// Parse variables from pipeline in a form to pass to the exec.Cmd Env property
+func parseVariables(vars map[string]string) []string {
+	var ret []string = make([]string, 0)
+	for key, val := range vars {
+		ret = append(ret, string(key+"="+val))
+	}
+	return ret
+}
+
 // Executes the script for a step
-func executeScript(script pipeline.Script) error {
+func executeScript(script pipeline.Script, variables []string) error {
 	cmd := exec.Command("sh", "-c", string(script))
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = variables
 
 	err := cmd.Run()
 	if err != nil {
