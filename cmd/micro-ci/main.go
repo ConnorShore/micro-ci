@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
+	"github.com/ConnorShore/micro-ci/internal/runner"
 )
 
 func main() {
@@ -14,5 +15,17 @@ func main() {
 		return
 	}
 
-	fmt.Printf("%v+\n", pipeline)
+	// fmt.Printf("%v+\n", pipeline)
+
+	runner, err := runner.NewRunner()
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+
+	err = runner.Run(*pipeline)
+	if err != nil {
+		fmt.Println("Error Running Pipeline: ", err)
+		return
+	}
 }

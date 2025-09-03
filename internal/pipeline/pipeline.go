@@ -19,6 +19,7 @@ type Pipeline struct {
 	Steps []Step `yaml:"steps"`
 }
 
+// Given a filepath, parse the file into a Pipeline object
 func ParsePipeline(file string) (*Pipeline, error) {
 	data, err := os.ReadFile(file)
 	if err != nil {

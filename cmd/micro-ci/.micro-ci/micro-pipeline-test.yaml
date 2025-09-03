@@ -10,12 +10,7 @@ steps:
       echo "Building Go Project"
       go build -v ./...
 
-  - name: Skip this step
-    condition: 3 == 5
+  - name: Project directory files
     script: |
-      echo "This step is skipped"
-
-  - name: Execute this step
-    condition: 5 == 5
-    script: |
-      echo "This step was executed"
+      echo "Listing project directory files"
+      ls
