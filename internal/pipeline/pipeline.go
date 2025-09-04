@@ -6,6 +6,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// TODO: Add jobs to pipelines
+
 type Script string
 
 type Step struct {
@@ -18,6 +20,7 @@ type Step struct {
 
 type Pipeline struct {
 	Name      string            `yaml:"name"`
+	Image     string            `yaml:"image"`
 	Variables map[string]string `yaml:"variables"`
 	Steps     []Step            `yaml:"steps"`
 }

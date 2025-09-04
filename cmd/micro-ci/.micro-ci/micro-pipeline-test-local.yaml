@@ -1,4 +1,4 @@
-name: Micro CI Pipeline Test
+name: Micro CI Pipeline Test Local
 
 variables:
   GO_ENV: development

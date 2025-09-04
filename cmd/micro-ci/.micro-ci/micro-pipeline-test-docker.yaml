@@ -1,0 +1,35 @@
+name: Micro CI Pipeline Test Local
+
+variables:
+  GO_ENV: development
+  APP_VERSION: 1.0.0
+
+image: golang:1.21-alpine
+
+steps:
+  - name: Display Message
+    script: |
+      echo "Running Micro CI Pipeline Test"
+
+  - name: Project directory files
+    script: |
+      echo "Listing project directory files"
+      ls
+
+  - name: Failure Step Example
+    continueOnError: true
+    script: |
+      echo "This pipeline should not exit due to a bash script failure
+      asdfkjkqek ;k;kl
+
+  - name: Show Local Variales and Environment Variables
+    variables:
+      LOCAL_VAR: tester
+    script: |
+      echo "Local Variable: $LOCAL_VAR"
+      echo "Environment Variable GO_ENV: $GO_ENV"
+      echo "Environment Variable APP_VERSION: $APP_VERSION"
+
+  - name: Try Show Local Variable in another step
+    script: |
+      echo "Trying to access LOCAL_VAR from previous step: $LOCAL_VAR"

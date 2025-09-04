@@ -1,71 +1,45 @@
 package runner
 
 import (
+	"context"
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
 )
 
-type Runner struct {
-	executionDir    string
-	environmentVars []string
+type Runner interface {
+	Run(p pipeline.Pipeline) error
+	RunStep(ctx context.Context, s pipeline.Step) (bool, error)
 }
 
-func NewRunner() (*Runner, error) {
-	return &Runner{}, nil
+type BaseRunner struct {
+	EnvironmentVars []string
 }
 
-// Runs the passed in pipeline
-func (r *Runner) Run(p pipeline.Pipeline) error {
-	dir, err := os.MkdirTemp("", "microci-runner-env")
-	fmt.Println("Runner dir: ", dir)
-	if err != nil {
-		return fmt.Errorf("failed to create micro-ci runner environment: %v", err)
-	}
-	defer os.RemoveAll(dir)
+func (br *BaseRunner) runAllSteps(ctx context.Context, r Runner, p pipeline.Pipeline) error {
+	br.EnvironmentVars = append(os.Environ(), parseVariables(p.Variables)...)
 
-	r.executionDir = dir
+	for _, s := range p.Steps {
+		run, err := canRunStep(s)
+		if err != nil {
+			fmt.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
+			return err
+		}
 
-	// get environment variables from pipeline
-	r.environmentVars = parseVariables(p.Variables)
+		if !run {
+			fmt.Printf("Skipping step [%v].\n", s.Name)
+			return nil
+		}
 
-	fmt.Println("Running pipeline in directory: ", dir)
-	// Run each step in the pipeline
-	for _, step := range p.Steps {
-		_, err := r.RunStep(step)
-		if err != nil && !step.ContinueOnError {
-			fmt.Printf("Exiting due to error on step [%v+]\n", step)
+		_, err = r.RunStep(ctx, s)
+		if err != nil && !s.ContinueOnError {
+			fmt.Printf("Exiting due to error on step [%v+]\n", s)
 			return err
 		}
 	}
 
 	return nil
-}
-
-func (r *Runner) RunStep(s pipeline.Step) (bool, error) {
-	run, err := canRunStep(s)
-	if err != nil {
-		fmt.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
-		return false, err
-	}
-
-	if !run {
-		fmt.Printf("Skipping step [%v].\n", s.Name)
-		return false, nil
-	}
-
-	// Get the local variables to the step to append to the environment vars for this step
-	localVars := parseVariables(s.Variables)
-
-	fmt.Printf("===== Executing Step [%v] =====\n", s.Name)
-	err = executeScript(s.Script, r.executionDir, append(r.environmentVars, localVars...))
-	if err != nil {
-		return false, fmt.Errorf("failed to execute script for step [%v]: %v", s.Name, err)
-	}
-
-	return true, nil
 }
 
 // Evaluates Step's condition to determine if step should be ran
@@ -81,20 +55,4 @@ func parseVariables(vars map[string]string) []string {
 		ret = append(ret, string(key+"="+val))
 	}
 	return ret
-}
-
-// Executes the script for a step
-func executeScript(script pipeline.Script, directory string, variables []string) error {
-	cmd := exec.Command("sh", "-c", string(script))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Dir = directory
-	cmd.Env = variables
-
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("command execution failed: %w", err)
-	}
-
-	return nil
 }
