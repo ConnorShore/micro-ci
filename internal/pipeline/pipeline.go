@@ -9,11 +9,11 @@ import (
 type Script string
 
 type Step struct {
-	Name      string            `yaml:"name"`
-	Condition string            `yaml:"condition"`
-	Variables map[string]string `yaml:"variables"`
-	// ContinueOnError bool     `yaml:"continueOnError`
-	Script Script `yaml:"script"`
+	Name            string            `yaml:"name"`
+	Condition       string            `yaml:"condition"`
+	Variables       map[string]string `yaml:"variables"`
+	ContinueOnError bool              `yaml:"continueOnError"`
+	Script          Script            `yaml:"script"`
 }
 
 type Pipeline struct {

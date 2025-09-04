@@ -17,8 +17,6 @@ func NewRunner() (*Runner, error) {
 	return &Runner{}, nil
 }
 
-// TODO: Write decorators for logging
-
 // Runs the passed in pipeline
 func (r *Runner) Run(p pipeline.Pipeline) error {
 	dir, err := os.MkdirTemp("", "microci-runner-env")
@@ -36,8 +34,9 @@ func (r *Runner) Run(p pipeline.Pipeline) error {
 	fmt.Println("Running pipeline in directory: ", dir)
 	// Run each step in the pipeline
 	for _, step := range p.Steps {
-		r.RunStep(step)
-		if err != nil {
+		_, err := r.RunStep(step)
+		if err != nil && !step.ContinueOnError {
+			fmt.Printf("Exiting due to error on step [%v+]\n", step)
 			return err
 		}
 	}

@@ -14,6 +14,12 @@ steps:
       echo "Listing project directory files"
       ls
 
+  - name: Failure Step Example
+    continueOnError: true
+    script: |
+      echo "This pipeline should not exit due to a bash script failure
+      asdfkjkqek ;k;kl
+
   - name: Show Local Variales and Environment Variables
     variables:
       LOCAL_VAR: tester
