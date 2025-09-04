@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +16,10 @@ import (
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
+)
+
+const (
+	containerNameBase = "microci-runner"
 )
 
 // Options for creating a new Docker container for running the pipeline steps
@@ -68,7 +73,7 @@ func (r *DockerRunner) Run(p pipeline.Pipeline) error {
 
 	options := DockerContainerOptions{
 		Image:      p.Image,
-		Name:       p.Name,
+		Name:       createContainerName(),
 		Port:       "8080",
 		WorkingDir: absDir,
 		Env:        p.Variables,
@@ -186,7 +191,7 @@ func (r *DockerRunner) createAndStartDockerContainer(ctx context.Context, opts D
 		Env:        r.EnvironmentVars,
 	}, &container.HostConfig{
 		Binds: []string{fmt.Sprintf("%s:/workspace", opts.WorkingDir)},
-	}, nil, nil, "")
+	}, nil, nil, opts.Name)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker container: %v", err)
 	}
@@ -219,7 +224,13 @@ func (r *DockerRunner) waitForDockerContainerInitialization(ctx context.Context)
 		}
 
 		fmt.Println("Waiting for container to become healthy...")
-		time.Sleep(time.Second)
+		select {
+		case <-time.After(1 * time.Second):
+			continue
+		case <-deadlineCtx.Done():
+			// The context was canceled (e.g., timeout), return immediately.
+			return deadlineCtx.Err()
+		}
 	}
 }
 
@@ -241,4 +252,8 @@ func (r *DockerRunner) stopAndRemoveDockerContainer(ctx context.Context) error {
 
 func makeSingleLineScript(s pipeline.Script) string {
 	return strings.Join(strings.Split(strings.TrimSpace(string(s)), "\n"), " && ")
+}
+
+func createContainerName() string {
+	return containerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
 }
