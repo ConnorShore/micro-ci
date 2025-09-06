@@ -3,26 +3,33 @@ package pipeline
 import (
 	"os"
 
+	"github.com/ConnorShore/micro-ci/internal/common"
 	"gopkg.in/yaml.v3"
 )
-
-// TODO: Add jobs to pipelines
 
 type Script string
 
 type Step struct {
-	Name            string            `yaml:"name"`
-	Condition       string            `yaml:"condition"`
-	Variables       map[string]string `yaml:"variables"`
-	ContinueOnError bool              `yaml:"continueOnError"`
-	Script          Script            `yaml:"script"`
+	Name            string             `yaml:"name"`
+	Condition       string             `yaml:"condition"`
+	Variables       common.VariableMap `yaml:"variables"`
+	ContinueOnError bool               `yaml:"continueOnError"`
+	Script          Script             `yaml:"script"`
+}
+
+// TODO: Add depends on for jobs (job2 depends on job1, etc)
+type Job struct {
+	Name      string             `yaml:"job"`
+	Condition string             `yaml:"condition"`
+	Variables common.VariableMap `yaml:"variables"`
+	Image     string             `yaml:"image"`
+	Steps     []Step             `yaml:"steps"`
 }
 
 type Pipeline struct {
-	Name      string            `yaml:"name"`
-	Image     string            `yaml:"image"`
-	Variables map[string]string `yaml:"variables"`
-	Steps     []Step            `yaml:"steps"`
+	Name      string             `yaml:"name"`
+	Variables common.VariableMap `yaml:"variables"`
+	Jobs      []Job
 }
 
 // Given a filepath, parse the file into a Pipeline object

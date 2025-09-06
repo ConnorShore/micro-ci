@@ -18,7 +18,6 @@ func main() {
 
 	// fmt.Printf("%v+\n", pipeline)
 
-	// runner := runner.NewLocalRunner()
 	runner, err := runner.NewDockerRunner()
 	if err != nil {
 		log.Fatalf("error creating docker runner: %v\n", err)

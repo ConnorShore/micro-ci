@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
@@ -28,7 +29,7 @@ type DockerContainerOptions struct {
 	Name       string
 	Port       string
 	WorkingDir string
-	Env        map[string]string
+	Env        common.VariableMap
 }
 
 // Represents a Docker container that is created to run the pipeline steps
@@ -56,9 +57,6 @@ func NewDockerRunner() (*DockerRunner, error) {
 }
 
 func (r *DockerRunner) Run(p pipeline.Pipeline) error {
-	// base context to use throughout run
-	ctx := context.Background()
-
 	// Implementation for running the pipeline in a Docker container
 	dir, err := os.MkdirTemp("", "microci-runner-env")
 	if err != nil {
@@ -71,17 +69,31 @@ func (r *DockerRunner) Run(p pipeline.Pipeline) error {
 		return fmt.Errorf("failed to create absolute path for dir: %v", dir)
 	}
 
+	r.WorkingDirectory = absDir
+
+	_, err = r.runAllJobs(r, p)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *DockerRunner) RunJob(j pipeline.Job, variables common.VariableMap) (bool, error) {
+	// base context to use throughout job
+	ctx := context.Background()
+
 	options := DockerContainerOptions{
-		Image:      p.Image,
+		Image:      j.Image,
 		Name:       createContainerName(),
 		Port:       "8080",
-		WorkingDir: absDir,
-		Env:        p.Variables,
+		WorkingDir: r.WorkingDirectory,
+		Env:        variables,
 	}
 
 	container, err := r.createAndStartDockerContainer(ctx, options)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer func() {
 		if err := r.stopAndRemoveDockerContainer(ctx); err != nil {
@@ -95,32 +107,33 @@ func (r *DockerRunner) Run(p pipeline.Pipeline) error {
 
 	// Wait for container to be ready before running steps
 	if err := r.waitForDockerContainerInitialization(ctx); err != nil {
-		return err
+		return false, err
 	}
 
 	fmt.Println("Starting to run all steps")
-	if err := r.runAllSteps(ctx, r, p); err != nil {
-		return err
+	if err := r.runAllSteps(ctx, r, j, variables); err != nil {
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
-func (r *DockerRunner) RunStep(ctx context.Context, s pipeline.Step) (bool, error) {
-	if err := r.executeScript(ctx, s); err != nil {
+func (r *DockerRunner) RunStep(ctx context.Context, s pipeline.Step, variables common.VariableMap) (bool, error) {
+	stepVariables := mergeVariables(variables, s.Variables)
+	if err := r.executeScript(ctx, s, stepVariables); err != nil {
 		return false, fmt.Errorf("failed to run step [%v]: %v", s.Name, err)
 	}
 
 	return true, nil
 }
 
-func (r *DockerRunner) executeScript(ctx context.Context, s pipeline.Step) error {
+func (r *DockerRunner) executeScript(ctx context.Context, s pipeline.Step, variables common.VariableMap) error {
 	cmd := append([]string{"sh", "-c"}, makeSingleLineScript(s.Script))
 	execOpts := container.ExecOptions{
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
-		Env:          append(r.EnvironmentVars, parseVariables(s.Variables)...),
+		Env:          variablesMapToSlice(variables),
 		Cmd:          cmd,
 	}
 
@@ -188,7 +201,7 @@ func (r *DockerRunner) createAndStartDockerContainer(ctx context.Context, opts D
 		Cmd:        []string{"tail", "-f", "/dev/null"},
 		Tty:        false,
 		WorkingDir: "/workspace",
-		Env:        r.EnvironmentVars,
+		Env:        variablesMapToSlice(opts.Env),
 	}, &container.HostConfig{
 		Binds: []string{fmt.Sprintf("%s:/workspace", opts.WorkingDir)},
 	}, nil, nil, opts.Name)
