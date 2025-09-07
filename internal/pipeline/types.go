@@ -1,10 +1,7 @@
 package pipeline
 
 import (
-	"os"
-
 	"github.com/ConnorShore/micro-ci/internal/common"
-	"gopkg.in/yaml.v3"
 )
 
 type Script string
@@ -24,26 +21,11 @@ type Job struct {
 	Variables common.VariableMap `yaml:"variables"`
 	Image     string             `yaml:"image"`
 	Steps     []Step             `yaml:"steps"`
+	// DependsOn
 }
 
 type Pipeline struct {
 	Name      string             `yaml:"name"`
 	Variables common.VariableMap `yaml:"variables"`
 	Jobs      []Job
-}
-
-// Given a filepath, parse the file into a Pipeline object
-func ParsePipeline(file string) (*Pipeline, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-
-	pipeline := &Pipeline{}
-	err = yaml.Unmarshal(data, pipeline)
-	if err != nil {
-		return nil, err
-	}
-
-	return pipeline, nil
 }
