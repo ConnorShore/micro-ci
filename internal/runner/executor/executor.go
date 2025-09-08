@@ -15,7 +15,7 @@ type ExecutorOpts struct {
 }
 
 type Executor interface {
-	Execute(opts ExecutorOpts, onStdOut func(line string)) error
+	Execute(opts ExecutorOpts, environmentId string, onStdOut func(line string)) error
 }
 
 // Converts script to a single line

@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package micro_ci;
+
+option go_package = "pkg/rpc/micro_ci";
+
+// Service definition
+service  MicroCI {
+    // Register a new runner with the CI server
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+
+    // Unregister a runner from the CI server
+    rpc Unregister(UnregisterRequest) returns (UnregisterResponse);
+
+    // Fetch a job for the registered runner to execute
+    rpc FetchJob(FetchJobRequest) returns (FetchJobResponse);
+
+    // Update the status of a job
+    rpc UpdateJobStatus(UpdateJobStatusRequest) returns (UpdateJobStatusResponse);
+
+    // Stream logs from the runner to the CI server
+    // rpc StreamLogs(StreamLogsRequest) returns (StreamLogsResponse);
+}
+
+message Step {
+    string name = 1;
+    string condition = 2;
+    map<string, string> variables = 3;
+    bool continue_on_error = 4;
+    string script = 5;
+}
+
+message Job {
+    string id = 1;
+    string name = 2;
+    string condition = 3;
+    map<string, string> variables = 4;
+    string image = 5;
+    repeated Step steps = 6;
+}
+
+// Message definitions
+message RegisterRequest {
+    string machine_id = 1;
+}
+
+message RegisterResponse {
+    bool success = 1;
+}
+
+message UnregisterRequest {
+    string runner_id = 1;
+}
+
+message UnregisterResponse {
+    bool success = 1;
+}
+
+message FetchJobRequest {
+    string runner_id = 1;
+}
+
+message FetchJobResponse {
+    Job job = 1;
+}
+
+message UpdateJobStatusRequest {
+    string job_run_id = 1;
+    string status = 2;
+}
+
+message UpdateJobStatusResponse {
+    bool success = 1;
+}
+
+// message StreamLogsRequest {
+//     string job_run_id = 1;
+//     string log_data = 2;
+// }
+
+// message StreamLogsResponse {
+//     bool success = 1;
+// }

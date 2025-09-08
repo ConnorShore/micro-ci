@@ -7,27 +7,34 @@ import (
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
 	"github.com/ConnorShore/micro-ci/internal/runner/executor"
 	"github.com/docker/docker/client"
+	"github.com/google/uuid"
 )
 
 type MachineState string
+type JobStatus string
 
 const (
 	StateOffline MachineState = "offline"
 	StateIdle    MachineState = "idle"
 	StateBusy    MachineState = "busy"
+
+	StatePending JobStatus = "pending"
+	StateRunning JobStatus = "running"
+	StateFailed  JobStatus = "failed"
+	StateSuccess JobStatus = "success"
 )
 
 type Machine struct {
-	id       string
-	name     string
-	address  string
-	state    MachineState
+	ID       string
+	Name     string
+	Address  string
+	State    MachineState
 	client   *client.Client
-	executor executor.Executor
+	executor *executor.Executor
 	shutdown chan struct{} // shutdown signal
 }
 
-func NewMachine(name, address string, executor executor.Executor) (*Machine, error) {
+func NewMachine(name, address string, executor *executor.Executor) (*Machine, error) {
 	fmt.Println("Creating Docker client...")
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -35,28 +42,30 @@ func NewMachine(name, address string, executor executor.Executor) (*Machine, err
 	}
 
 	return &Machine{
-		name:     name,
-		address:  address,
-		state:    StateOffline,
+		ID:       uuid.New().String(),
+		Name:     name,
+		Address:  address,
+		State:    StateOffline,
 		client:   cli,
 		executor: executor,
 	}, nil
 }
 
 func (m *Machine) Run() error {
-	m.state = StateIdle
+	m.State = StateIdle
 
 	// TODO: Register machine with server
+	// m.RunnerID = {responseID}
 
 	pollTicker := time.NewTicker(5 * time.Second)
 	for {
 		select {
 		case <-m.shutdown:
-			m.state = StateOffline
-			fmt.Printf("Machine [%v] has been shutdown.\n", m.name)
+			m.State = StateOffline
+			fmt.Printf("Machine [%v] has been shutdown.\n", m.Name)
 			return nil
 		case <-pollTicker.C:
-			if m.state == StateIdle {
+			if m.State == StateIdle {
 				m.pollForJobs()
 			}
 		}

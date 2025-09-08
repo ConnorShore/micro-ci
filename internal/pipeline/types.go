@@ -16,6 +16,7 @@ type Step struct {
 
 // TODO: Add depends on for jobs (job2 depends on job1, etc)
 type Job struct {
+	Id        string             `yaml:"-"`
 	Name      string             `yaml:"job"`
 	Condition string             `yaml:"condition"`
 	Variables common.VariableMap `yaml:"variables"`

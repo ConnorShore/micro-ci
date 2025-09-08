@@ -1,31 +1,39 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/ConnorShore/micro-ci/internal/pipeline"
 	"github.com/ConnorShore/micro-ci/internal/runner"
+	"github.com/ConnorShore/micro-ci/internal/runner/executor"
 )
 
 func main() {
-	testScript := "./cmd/micro-ci/.micro-ci/micro-pipeline-test-docker.yaml"
-	pipeline, err := pipeline.ParsePipeline(testScript)
+
+	executor := executor.NewDockerShellExecutor()
+	machine1, err := runner.NewMachine("test-runner-1", "localhost:8001", &executor)
 	if err != nil {
-		fmt.Println("Error: ", err)
-		return
+		log.Fatal(err)
 	}
 
-	// fmt.Printf("%v+\n", pipeline)
+	log.Fatal(machine1.Run())
 
-	runner, err := runner.NewDockerRunner()
-	if err != nil {
-		log.Fatalf("error creating docker runner: %v\n", err)
-	}
+	// testScript := "./cmd/micro-ci/.micro-ci/micro-pipeline-test-docker.yaml"
+	// pipeline, err := pipeline.ParsePipeline(testScript)
+	// if err != nil {
+	// 	fmt.Println("Error: ", err)
+	// 	return
+	// }
 
-	err = runner.Run(*pipeline)
+	// // fmt.Printf("%v+\n", pipeline)
 
-	if err != nil {
-		log.Fatalf("error running pipeline: %v\n", err)
-	}
+	// runner, err := runner.NewDockerRunner()
+	// if err != nil {
+	// 	log.Fatalf("error creating docker runner: %v\n", err)
+	// }
+
+	// err = runner.Run(*pipeline)
+
+	// if err != nil {
+	// 	log.Fatalf("error running pipeline: %v\n", err)
+	// }
 }
