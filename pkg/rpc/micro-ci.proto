@@ -49,7 +49,7 @@ message RegisterResponse {
 }
 
 message UnregisterRequest {
-    string runner_id = 1;
+    string machine_id = 1;
 }
 
 message UnregisterResponse {
@@ -57,7 +57,7 @@ message UnregisterResponse {
 }
 
 message FetchJobRequest {
-    string runner_id = 1;
+    string machine_id = 1;
 }
 
 message FetchJobResponse {

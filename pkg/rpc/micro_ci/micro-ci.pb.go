@@ -272,7 +272,7 @@ func (x *RegisterResponse) GetSuccess() bool {
 
 type UnregisterRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RunnerId      string                 `protobuf:"bytes,1,opt,name=runner_id,json=runnerId,proto3" json:"runner_id,omitempty"`
+	MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -307,9 +307,9 @@ func (*UnregisterRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *UnregisterRequest) GetRunnerId() string {
+func (x *UnregisterRequest) GetMachineId() string {
 	if x != nil {
-		return x.RunnerId
+		return x.MachineId
 	}
 	return ""
 }
@@ -360,7 +360,7 @@ func (x *UnregisterResponse) GetSuccess() bool {
 
 type FetchJobRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	RunnerId      string                 `protobuf:"bytes,1,opt,name=runner_id,json=runnerId,proto3" json:"runner_id,omitempty"`
+	MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -395,9 +395,9 @@ func (*FetchJobRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *FetchJobRequest) GetRunnerId() string {
+func (x *FetchJobRequest) GetMachineId() string {
 	if x != nil {
-		return x.RunnerId
+		return x.MachineId
 	}
 	return ""
 }
@@ -570,13 +570,15 @@ const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
 	"\n" +
 	"machine_id\x18\x01 \x01(\tR\tmachineId\",\n" +
 	"\x10RegisterResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"0\n" +
-	"\x11UnregisterRequest\x12\x1b\n" +
-	"\trunner_id\x18\x01 \x01(\tR\brunnerId\".\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"2\n" +
+	"\x11UnregisterRequest\x12\x1d\n" +
+	"\n" +
+	"machine_id\x18\x01 \x01(\tR\tmachineId\".\n" +
 	"\x12UnregisterResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\".\n" +
-	"\x0fFetchJobRequest\x12\x1b\n" +
-	"\trunner_id\x18\x01 \x01(\tR\brunnerId\"3\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"0\n" +
+	"\x0fFetchJobRequest\x12\x1d\n" +
+	"\n" +
+	"machine_id\x18\x01 \x01(\tR\tmachineId\"3\n" +
 	"\x10FetchJobResponse\x12\x1f\n" +
 	"\x03job\x18\x01 \x01(\v2\r.micro_ci.JobR\x03job\"N\n" +
 	"\x16UpdateJobStatusRequest\x12\x1c\n" +

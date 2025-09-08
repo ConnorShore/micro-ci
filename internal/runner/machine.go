@@ -1,71 +1,78 @@
 package runner
 
 import (
+	"context"
 	"fmt"
 	"time"
 
+	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
+	mciClient "github.com/ConnorShore/micro-ci/internal/runner/client"
 	"github.com/ConnorShore/micro-ci/internal/runner/executor"
-	"github.com/docker/docker/client"
+	dockerClient "github.com/docker/docker/client"
 	"github.com/google/uuid"
 )
 
-type MachineState string
-type JobStatus string
-
-const (
-	StateOffline MachineState = "offline"
-	StateIdle    MachineState = "idle"
-	StateBusy    MachineState = "busy"
-
-	StatePending JobStatus = "pending"
-	StateRunning JobStatus = "running"
-	StateFailed  JobStatus = "failed"
-	StateSuccess JobStatus = "success"
-)
-
 type Machine struct {
-	ID       string
-	Name     string
-	Address  string
-	State    MachineState
-	client   *client.Client
-	executor *executor.Executor
-	shutdown chan struct{} // shutdown signal
+	ID           string
+	Name         string
+	State        common.MachineState
+	executor     executor.Executor
+	mciClient    mciClient.MicroCIClient
+	dockerClient *dockerClient.Client
+	shutdown     chan struct{} // shutdown signal
 }
 
-func NewMachine(name, address string, executor *executor.Executor) (*Machine, error) {
+func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executor.Executor) (*Machine, error) {
 	fmt.Println("Creating Docker client...")
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	cli, err := dockerClient.NewClientWithOpts(dockerClient.FromEnv, dockerClient.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, fmt.Errorf("failed to start docker client: %v", err)
 	}
 
 	return &Machine{
-		ID:       uuid.New().String(),
-		Name:     name,
-		Address:  address,
-		State:    StateOffline,
-		client:   cli,
-		executor: executor,
+		ID:           uuid.New().String(),
+		Name:         name,
+		State:        common.StateOffline,
+		mciClient:    mciClient,
+		dockerClient: cli,
+		executor:     executor,
 	}, nil
 }
 
 func (m *Machine) Run() error {
-	m.State = StateIdle
+	parentCtx := context.Background()
+	defer func(ctx context.Context) error {
+		err := m.mciClient.Unregister(ctx, m.ID)
+		if err != nil {
+			// TODO: Need to probably do better handling if fail to unregister, just log for now
+			fmt.Printf("Failed to unregister machine [%v] from server\n. Proceeding to close client connection...", m.ID)
+		}
 
-	// TODO: Register machine with server
-	// m.RunnerID = {responseID}
+		err = m.mciClient.Close()
+		return err
+	}(parentCtx)
+
+	m.State = common.StateIdle
+
+	// Register machine with the server
+	ctx, cancel := context.WithTimeout(parentCtx, 15*time.Second)
+	defer cancel()
+
+	err := m.mciClient.Register(ctx, m.ID)
+	if err != nil {
+		return err
+	}
 
 	pollTicker := time.NewTicker(5 * time.Second)
 	for {
 		select {
 		case <-m.shutdown:
-			m.State = StateOffline
+			m.State = common.StateOffline
 			fmt.Printf("Machine [%v] has been shutdown.\n", m.Name)
 			return nil
 		case <-pollTicker.C:
-			if m.State == StateIdle {
+			if m.State == common.StateIdle {
 				m.pollForJobs()
 			}
 		}
@@ -73,11 +80,57 @@ func (m *Machine) Run() error {
 }
 
 func (m *Machine) pollForJobs() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	// Ask the server to see if any jobs are available
+	job, err := m.mciClient.FetchJob(ctx, m.ID)
+	if err != nil {
+		fmt.Printf("Failed to fetch job with error: %v\n", err)
+		return
+	}
+
+	if job == nil || job.Id == "" {
+		fmt.Printf("No jobs found. Returned: %+v\n", job)
+		return
+	}
+
+	// Job was found, run it
 }
 
-func (m *Machine) runJob(j pipeline.Job) {
+func (m *Machine) runJob(j pipeline.Job) error {
+	m.State = common.StateBusy
+	defer func() {
+		m.State = common.StateIdle
+	}()
+
 	// Spawns container and runs each step in the job
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := m.mciClient.UpdateJobStatus(ctx, common.StatusRunning)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
+	}
+
+	// Run the job
+	fmt.Printf("Running job: %+v...\n", j)
+
+	// Update job status based on completion
+	var status common.JobStatus
+	success := true
+	if success {
+		err = m.mciClient.UpdateJobStatus(ctx, common.StatusSuccess)
+		status = common.StatusSuccess
+	} else {
+		err = m.mciClient.UpdateJobStatus(ctx, common.StatusFailed)
+		status = common.StatusFailed
+	}
+	if err != nil {
+		return fmt.Errorf("failed to update job status to %v: %v", status, err)
+	}
+
+	return nil
 }
 
 // TODO: Implement run job stuff once server/runner communication is working

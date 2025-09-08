@@ -6,8 +6,8 @@ import (
 	"net"
 	"slices"
 
+	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
-	"github.com/ConnorShore/micro-ci/internal/runner"
 	"github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -37,12 +37,12 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 		return nil, err
 	}
 
-	var jobStatus map[string]runner.JobStatus
+	var jobStatus map[string]common.JobStatus
 
 	jobQ := make(chan pipeline.Job, 1)
 	for _, j := range p.Jobs {
 		j.Id = uuid.NewString()
-		jobStatus[j.Id] = runner.StatePending
+		jobStatus[j.Id] = common.StatusPending
 		jobQ <- j
 	}
 
@@ -75,10 +75,10 @@ func (s *MicroCIServer) Register(ctx context.Context, req *micro_ci.RegisterRequ
 
 // Register a new runner with the CI server
 func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.UnregisterRequest) (*micro_ci.UnregisterResponse, error) {
-	if !slices.Contains(s.machines, req.RunnerId) {
+	if !slices.Contains(s.machines, req.MachineId) {
 		return &micro_ci.UnregisterResponse{
 			Success: false,
-		}, fmt.Errorf("server does not contain machine with id [%v]", req.RunnerId)
+		}, fmt.Errorf("server does not contain machine with id [%v]", req.MachineId)
 	}
 	return &micro_ci.UnregisterResponse{
 		Success: true,
@@ -89,7 +89,7 @@ func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.Unregister
 func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) {
 	select {
 	case j := <-s.jobCh:
-		s.jobMachineMap[j.Id] = req.RunnerId
+		s.jobMachineMap[j.Id] = req.MachineId
 
 		return &micro_ci.FetchJobResponse{
 			Job: s.convertJobToProtoJob(j),
