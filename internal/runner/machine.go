@@ -32,7 +32,7 @@ func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executo
 	}
 
 	return &Machine{
-		ID:           uuid.New().String(),
+		ID:           uuid.NewString(),
 		Name:         name,
 		State:        common.StateOffline,
 		mciClient:    mciClient,
@@ -64,6 +64,7 @@ func (m *Machine) Run() error {
 	if err != nil {
 		return err
 	}
+	log.Println("Successfully registered machine with server")
 
 	pollTicker := time.NewTicker(5 * time.Second)
 	for {
@@ -81,6 +82,8 @@ func (m *Machine) Run() error {
 }
 
 func (m *Machine) pollForJobs() {
+	log.Printf("Machine [%v] polling for job...\n", m.Name)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -91,15 +94,20 @@ func (m *Machine) pollForJobs() {
 		return
 	}
 
-	if job == nil || job.Id == "" {
-		log.Printf("No jobs found. Returned: %+v\n", job)
+	if job == nil {
+		log.Println("No jobs found. Will continue polling...")
 		return
 	}
 
+	log.Printf("Machine [%v] found job [%v]...\n", m.Name, job.Name)
+
 	// Job was found, run it
+	if err := m.runJob(job); err != nil {
+		log.Printf("Failed to execute job [%v]: %v\n", job.Name, err)
+	}
 }
 
-func (m *Machine) runJob(j pipeline.Job) error {
+func (m *Machine) runJob(j *pipeline.Job) error {
 	m.State = common.StateBusy
 	defer func() {
 		m.State = common.StateIdle
@@ -109,7 +117,7 @@ func (m *Machine) runJob(j pipeline.Job) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := m.mciClient.UpdateJobStatus(ctx, common.StatusRunning)
+	err := m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusRunning)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
 	}
@@ -121,10 +129,10 @@ func (m *Machine) runJob(j pipeline.Job) error {
 	var status common.JobStatus
 	success := true
 	if success {
-		err = m.mciClient.UpdateJobStatus(ctx, common.StatusSuccess)
+		err = m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusSuccess)
 		status = common.StatusSuccess
 	} else {
-		err = m.mciClient.UpdateJobStatus(ctx, common.StatusFailed)
+		err = m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusFailed)
 		status = common.StatusFailed
 	}
 	if err != nil {

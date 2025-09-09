@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"log"
 	"net"
 	"slices"
 
@@ -21,8 +22,8 @@ type MicroCIServer struct {
 
 	// TODO: Move items to db
 	machines      []string
-	jobStatus     map[string]string // (jobId, jobStatus)
-	jobMachineMap map[string]string // (jobRunId, machineId)
+	jobStatus     map[string]common.JobStatus // (jobId, jobStatus)
+	jobMachineMap map[string]string           // (jobRunId, machineId)
 
 	// TODO: Need to track when a pipeline is fully complete (all jobs complete/fail)
 }
@@ -38,7 +39,6 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 	}
 
 	var jobStatus = make(map[string]common.JobStatus, 0)
-
 	jobQ := make(chan pipeline.Job, 100)
 	for _, j := range p.Jobs {
 		j.Id = uuid.NewString()
@@ -47,7 +47,9 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 	}
 
 	return &MicroCIServer{
-		jobCh: jobQ,
+		jobCh:         jobQ,
+		jobStatus:     jobStatus,
+		jobMachineMap: make(map[string]string),
 	}, nil
 }
 
@@ -66,6 +68,7 @@ func (s *MicroCIServer) Start() error {
 
 // Register a new runner with the CI server
 func (s *MicroCIServer) Register(ctx context.Context, req *micro_ci.RegisterRequest) (*micro_ci.RegisterResponse, error) {
+	log.Printf("Register request from machine: %v\n", req.MachineId)
 	s.machines = append(s.machines, req.MachineId)
 
 	return &micro_ci.RegisterResponse{
@@ -75,6 +78,8 @@ func (s *MicroCIServer) Register(ctx context.Context, req *micro_ci.RegisterRequ
 
 // Register a new runner with the CI server
 func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.UnregisterRequest) (*micro_ci.UnregisterResponse, error) {
+	log.Printf("Unregister request from machine: %v\n", req.MachineId)
+
 	if !slices.Contains(s.machines, req.MachineId) {
 		return &micro_ci.UnregisterResponse{
 			Success: false,
@@ -87,8 +92,11 @@ func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.Unregister
 
 // Fetch a job for the registered runner to execute
 func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) {
+	log.Printf("Fetch Job request from machine: %v\n", req.MachineId)
 	select {
 	case j := <-s.jobCh:
+		log.Printf("Recieved job from channel: %+v\n", j)
+
 		s.jobMachineMap[j.Id] = req.MachineId
 
 		return &micro_ci.FetchJobResponse{
@@ -104,13 +112,14 @@ func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequ
 
 // Update the status of a job
 func (s *MicroCIServer) UpdateJobStatus(ctx context.Context, req *micro_ci.UpdateJobStatusRequest) (*micro_ci.UpdateJobStatusResponse, error) {
+	log.Printf("Update job status request for job [%v]. Status: %v\n", req.JobRunId, req.Status)
 	if _, exists := s.jobStatus[req.JobRunId]; !exists {
 		return &micro_ci.UpdateJobStatusResponse{
 			Success: false,
 		}, fmt.Errorf("job with run id [%v] does not exist", req.JobRunId)
 	}
 
-	s.jobStatus[req.JobRunId] = req.Status
+	s.jobStatus[req.JobRunId] = common.JobStatus(req.Status)
 	return &micro_ci.UpdateJobStatusResponse{
 		Success: true,
 	}, nil

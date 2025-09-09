@@ -49,6 +49,10 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.
 		return nil, err
 	}
 
+	if res.Job == nil {
+		return nil, nil
+	}
+
 	var steps []pipeline.Step
 	for _, s := range res.Job.Steps {
 		step := pipeline.Step{
@@ -71,8 +75,11 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.
 	}, nil
 }
 
-func (c *grpcClient) UpdateJobStatus(ctx context.Context, status common.JobStatus) error {
-	_, err := c.client.UpdateJobStatus(ctx, &micro_ci.UpdateJobStatusRequest{Status: string(status)})
+func (c *grpcClient) UpdateJobStatus(ctx context.Context, jobId string, status common.JobStatus) error {
+	_, err := c.client.UpdateJobStatus(ctx, &micro_ci.UpdateJobStatusRequest{
+		JobRunId: jobId,
+		Status:   string(status),
+	})
 	return err
 }
 
