@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"math/rand/v2"
 	"os"
 	"time"
@@ -146,7 +147,7 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 		WorkingDir: DefaultWorkspace,
 		Env:        common.VariablesMapToSlice(opts.Env),
 	}, &container.HostConfig{
-		Binds: []string{log.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
+		Binds: []string{fmt.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
 	}, nil, nil, createContainerName())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker container: %v", err)
@@ -161,5 +162,5 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 }
 
 func createContainerName() string {
-	return ContainerNameBase + "-" + log.Sprint(rand.IntN(90000)+10000)
+	return ContainerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
 }

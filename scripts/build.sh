@@ -1,1 +1,0 @@
-# TODO: Write build script for micro-ci project to compile proto files and generate necessary Go code.
