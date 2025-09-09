@@ -49,7 +49,7 @@ func NewDockerContainer(client *client.Client, opts DockerContainerOptions) (*Do
 }
 
 func (c *DockerContainer) Start() error {
-	fmt.Println("Starting Docker container with ID: ", c.ID)
+	log.Println("Starting Docker container with ID: ", c.ID)
 	if err := c.client.ContainerStart(c.ctx, c.ID, container.StartOptions{}); err != nil {
 		return fmt.Errorf("failed to start docker container: %v", err)
 	}
@@ -62,20 +62,20 @@ func (c *DockerContainer) Start() error {
 }
 
 func (c *DockerContainer) Stop() error {
-	fmt.Println("Stopping Docker container with ID: ", c.ID)
+	log.Println("Stopping Docker container with ID: ", c.ID)
 	if err := c.client.ContainerStop(c.ctx, c.ID, container.StopOptions{}); err != nil {
 		return fmt.Errorf("failed to stop Docker container: %w", err)
 	}
-	fmt.Println("Successfully stopped Docker container with ID: ", c.ID)
+	log.Println("Successfully stopped Docker container with ID: ", c.ID)
 	return nil
 }
 
 func (c *DockerContainer) Remove() error {
-	fmt.Println("Removing Docker container with ID: ", c.ID)
+	log.Println("Removing Docker container with ID: ", c.ID)
 	if err := c.client.ContainerRemove(c.ctx, c.ID, container.RemoveOptions{}); err != nil {
 		return fmt.Errorf("failed to remove Docker container: %w", err)
 	}
-	fmt.Println("Successfully removed Docker container with ID: ", c.ID)
+	log.Println("Successfully removed Docker container with ID: ", c.ID)
 
 	return nil
 }
@@ -92,11 +92,11 @@ func (c *DockerContainer) waitForDockerContainerInitialization() error {
 		}
 
 		if resp.State.Running {
-			fmt.Println("Container is running.")
+			log.Println("Container is running.")
 			return nil
 		}
 
-		fmt.Println("Waiting for container to become healthy...")
+		log.Println("Waiting for container to become healthy...")
 		select {
 		case <-time.After(1 * time.Second):
 			continue
@@ -108,7 +108,7 @@ func (c *DockerContainer) waitForDockerContainerInitialization() error {
 }
 
 func pullImage(ctx context.Context, client *client.Client, opts DockerContainerOptions) error {
-	fmt.Println("Pulling Docker image: ", opts.Image)
+	log.Println("Pulling Docker image: ", opts.Image)
 
 	// Check if image exists locally
 	args := filters.NewArgs()
@@ -120,7 +120,7 @@ func pullImage(ctx context.Context, client *client.Client, opts DockerContainerO
 
 	// If image doesn't exist locally, pull it in
 	if len(images) == 0 {
-		fmt.Println("Image not found locally. Pulling Docker image:", opts.Image)
+		log.Println("Image not found locally. Pulling Docker image:", opts.Image)
 		out, err := client.ImagePull(ctx, opts.Image, image.PullOptions{})
 		if err != nil {
 			return fmt.Errorf("failed to pull docker image [%v]: %v", opts.Image, err)
@@ -128,14 +128,14 @@ func pullImage(ctx context.Context, client *client.Client, opts DockerContainerO
 		defer out.Close()
 		io.Copy(os.Stdout, out)
 	} else {
-		fmt.Println("Found Docker image locally:", opts.Image)
+		log.Println("Found Docker image locally:", opts.Image)
 	}
 
 	return nil
 }
 
 func createContainer(ctx context.Context, client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) {
-	fmt.Println("Creating Docker container with image: ", opts.Image)
+	log.Println("Creating Docker container with image: ", opts.Image)
 
 	resp, err := client.ContainerCreate(ctx, &container.Config{
 		Image: opts.Image,
@@ -146,7 +146,7 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 		WorkingDir: DefaultWorkspace,
 		Env:        common.VariablesMapToSlice(opts.Env),
 	}, &container.HostConfig{
-		Binds: []string{fmt.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
+		Binds: []string{log.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
 	}, nil, nil, createContainerName())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker container: %v", err)
@@ -161,5 +161,5 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 }
 
 func createContainerName() string {
-	return ContainerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
+	return ContainerNameBase + "-" + log.Sprint(rand.IntN(90000)+10000)
 }

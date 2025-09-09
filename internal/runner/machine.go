@@ -3,6 +3,7 @@ package runner
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
@@ -24,7 +25,7 @@ type Machine struct {
 }
 
 func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executor.Executor) (*Machine, error) {
-	fmt.Println("Creating Docker client...")
+	log.Println("Creating Docker client...")
 	cli, err := dockerClient.NewClientWithOpts(dockerClient.FromEnv, dockerClient.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, fmt.Errorf("failed to start docker client: %v", err)
@@ -46,7 +47,7 @@ func (m *Machine) Run() error {
 		err := m.mciClient.Unregister(ctx, m.ID)
 		if err != nil {
 			// TODO: Need to probably do better handling if fail to unregister, just log for now
-			fmt.Printf("Failed to unregister machine [%v] from server\n. Proceeding to close client connection...", m.ID)
+			log.Printf("Failed to unregister machine [%v] from server\n. Proceeding to close client connection...", m.ID)
 		}
 
 		err = m.mciClient.Close()
@@ -69,7 +70,7 @@ func (m *Machine) Run() error {
 		select {
 		case <-m.shutdown:
 			m.State = common.StateOffline
-			fmt.Printf("Machine [%v] has been shutdown.\n", m.Name)
+			log.Printf("Machine [%v] has been shutdown.\n", m.Name)
 			return nil
 		case <-pollTicker.C:
 			if m.State == common.StateIdle {
@@ -86,12 +87,12 @@ func (m *Machine) pollForJobs() {
 	// Ask the server to see if any jobs are available
 	job, err := m.mciClient.FetchJob(ctx, m.ID)
 	if err != nil {
-		fmt.Printf("Failed to fetch job with error: %v\n", err)
+		log.Printf("Failed to fetch job with error: %v\n", err)
 		return
 	}
 
 	if job == nil || job.Id == "" {
-		fmt.Printf("No jobs found. Returned: %+v\n", job)
+		log.Printf("No jobs found. Returned: %+v\n", job)
 		return
 	}
 
@@ -114,7 +115,7 @@ func (m *Machine) runJob(j pipeline.Job) error {
 	}
 
 	// Run the job
-	fmt.Printf("Running job: %+v...\n", j)
+	log.Printf("Running job: %+v...\n", j)
 
 	// Update job status based on completion
 	var status common.JobStatus
@@ -178,7 +179,7 @@ func (m *Machine) runJob(j pipeline.Job) error {
 // 		if err := r.stopAndRemoveDockerContainer(ctx); err != nil {
 // 			// Log the cleanup error, but don't return it,
 // 			// as the original error from the steps is more important.
-// 			fmt.Fprintf(os.Stderr, "error during container cleanup: %v\n", err)
+// 			log.Fprintf(os.Stderr, "error during container cleanup: %v\n", err)
 // 		}
 // 	}()
 
@@ -189,7 +190,7 @@ func (m *Machine) runJob(j pipeline.Job) error {
 // 		return false, err
 // 	}
 
-// 	fmt.Println("Starting to run all steps")
+// 	log.Println("Starting to run all steps")
 // 	if err := r.runAllSteps(ctx, r, j, variables); err != nil {
 // 		return false, err
 // 	}
@@ -210,17 +211,17 @@ func (m *Machine) runJob(j pipeline.Job) error {
 // 	pipelineVars := mergeVariables(variablesSliceToMap(os.Environ()), p.Variables)
 
 // 	for _, j := range p.Jobs {
-// 		fmt.Printf("\n\n======= Running Job [%v] ======\n\n", j.Name)
+// 		log.Printf("\n\n======= Running Job [%v] ======\n\n", j.Name)
 // 		run, err := canRun(j.Condition)
 // 		if err != nil {
-// 			fmt.Printf("Job [%v] condition failed to parse. Skipping job.\n", j.Name)
-// 			fmt.Println(strings.Repeat("=", 60))
+// 			log.Printf("Job [%v] condition failed to parse. Skipping job.\n", j.Name)
+// 			log.Println(strings.Repeat("=", 60))
 // 			continue
 // 		}
 
 // 		if !run {
-// 			fmt.Printf("Skipping job [%v].\n", j.Name)
-// 			fmt.Println(strings.Repeat("=", 60))
+// 			log.Printf("Skipping job [%v].\n", j.Name)
+// 			log.Println(strings.Repeat("=", 60))
 // 			continue
 // 		}
 
@@ -228,7 +229,7 @@ func (m *Machine) runJob(j pipeline.Job) error {
 // 		if err != nil {
 // 			return false, fmt.Errorf("job [%v] failed to complete: %v", j.Name, err)
 // 		}
-// 		fmt.Printf("\n%v\n", strings.Repeat("=", 60))
+// 		log.Printf("\n%v\n", strings.Repeat("=", 60))
 // 	}
 
 // 	return true, nil
@@ -239,26 +240,26 @@ func (m *Machine) runJob(j pipeline.Job) error {
 // 	jobVars := mergeVariables(variables, j.Variables)
 
 // 	for _, s := range j.Steps {
-// 		fmt.Printf("\n---- Running Step [%v] ----\n", s.Name)
+// 		log.Printf("\n---- Running Step [%v] ----\n", s.Name)
 // 		run, err := canRun(s.Condition)
 // 		if err != nil {
-// 			fmt.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
-// 			fmt.Println(strings.Repeat("-", 60))
+// 			log.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
+// 			log.Println(strings.Repeat("-", 60))
 // 			continue
 // 		}
 
 // 		if !run {
-// 			fmt.Printf("Skipping step [%v].\n", s.Name)
-// 			fmt.Println(strings.Repeat("-", 60))
+// 			log.Printf("Skipping step [%v].\n", s.Name)
+// 			log.Println(strings.Repeat("-", 60))
 // 			continue
 // 		}
 
 // 		_, err = r.RunStep(ctx, s, jobVars)
 // 		if err != nil && !s.ContinueOnError {
-// 			fmt.Printf("Exiting due to error on step [%v+]\n", s)
+// 			log.Printf("Exiting due to error on step [%v+]\n", s)
 // 			return err
 // 		}
-// 		fmt.Println(strings.Repeat("-", 60))
+// 		log.Println(strings.Repeat("-", 60))
 // 	}
 
 // 	return nil
