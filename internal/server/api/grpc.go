@@ -16,7 +16,7 @@ import (
 type MicroCIServer struct {
 	micro_ci.UnimplementedMicroCIServer
 
-	// TODO: Better data structure for job queue and such
+	// TODO: Better approach (db or message queue)
 	jobCh chan (pipeline.Job)
 
 	// TODO: Move items to db
@@ -37,9 +37,9 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 		return nil, err
 	}
 
-	var jobStatus map[string]common.JobStatus
+	var jobStatus = make(map[string]common.JobStatus, 0)
 
-	jobQ := make(chan pipeline.Job, 1)
+	jobQ := make(chan pipeline.Job, 100)
 	for _, j := range p.Jobs {
 		j.Id = uuid.NewString()
 		jobStatus[j.Id] = common.StatusPending

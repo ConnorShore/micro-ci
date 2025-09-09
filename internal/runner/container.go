@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	DefaultWorkspace string = "/workspace"
+	DefaultWorkspace  string = "/workspace"
+	ContainerNameBase string = "microci-runner"
 )
 
 // Options for creating a new Docker container for running the job
@@ -70,7 +71,7 @@ func (c *DockerContainer) Stop() error {
 }
 
 func (c *DockerContainer) Remove() error {
-	fmt.Println("Removing Docker container with ID: ", r.Container.ID)
+	fmt.Println("Removing Docker container with ID: ", c.ID)
 	if err := c.client.ContainerRemove(c.ctx, c.ID, container.RemoveOptions{}); err != nil {
 		return fmt.Errorf("failed to remove Docker container: %w", err)
 	}
@@ -146,7 +147,7 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 		Env:        common.VariablesMapToSlice(opts.Env),
 	}, &container.HostConfig{
 		Binds: []string{fmt.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
-	}, nil, nil, opts.Name)
+	}, nil, nil, createContainerName())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker container: %v", err)
 	}
@@ -160,5 +161,5 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 }
 
 func createContainerName() string {
-	return containerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
+	return ContainerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
 }
