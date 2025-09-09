@@ -38,6 +38,7 @@ func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executo
 		mciClient:    mciClient,
 		dockerClient: cli,
 		executor:     executor,
+		shutdown:     make(chan struct{}),
 	}, nil
 }
 
@@ -140,6 +141,10 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 	}
 
 	return nil
+}
+
+func (m *Machine) Shutdown() {
+	close(m.shutdown)
 }
 
 // TODO: Implement run job stuff once server/runner communication is working

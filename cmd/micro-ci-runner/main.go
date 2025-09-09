@@ -1,7 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ConnorShore/micro-ci/internal/runner"
 	"github.com/ConnorShore/micro-ci/internal/runner/client"
@@ -21,5 +25,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Fatal(machine1.Run())
+	// Start the machine
+	go func() {
+		log.Fatal(machine1.Run())
+	}()
+
+	// handle safe shutdown
+	osSignals := make(chan os.Signal, 1)
+	signal.Notify(osSignals, syscall.SIGINT, syscall.SIGTERM)
+	<-osSignals // block until interuption is called
+
+	fmt.Printf("MicroCI Runner [%v] is shutting down...\n", machine1.Name)
+
+	machine1.Shutdown()
+
+	fmt.Printf("MicroCI Runner [%v] shutdown.\n", machine1.Name)
 }
