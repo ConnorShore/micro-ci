@@ -24,7 +24,6 @@ const (
 // Options for creating a new Docker container for running the job
 type DockerContainerOptions struct {
 	Image      string
-	Name       string
 	Port       string
 	WorkingDir string
 	Env        common.VariableMap
@@ -55,6 +54,7 @@ func (c *DockerContainer) Start() error {
 		return fmt.Errorf("failed to start docker container: %v", err)
 	}
 
+	log.Println("Begin waiting for container initialization")
 	if err := c.waitForDockerContainerInitialization(); err != nil {
 		return err
 	}
@@ -86,6 +86,7 @@ func (c *DockerContainer) waitForDockerContainerInitialization() error {
 	defer cancel()
 
 	for {
+		log.Println("Waiting for container...")
 		resp, err := c.client.ContainerInspect(deadlineCtx, c.ID)
 
 		if err != nil {
@@ -138,6 +139,7 @@ func pullImage(ctx context.Context, client *client.Client, opts DockerContainerO
 func createContainer(ctx context.Context, client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) {
 	log.Println("Creating Docker container with image: ", opts.Image)
 
+	containerName := createContainerName()
 	resp, err := client.ContainerCreate(ctx, &container.Config{
 		Image: opts.Image,
 		// Keep STDIN open and run a command that never exits
@@ -148,16 +150,18 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 		Env:        common.VariablesMapToSlice(opts.Env),
 	}, &container.HostConfig{
 		Binds: []string{fmt.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
-	}, nil, nil, createContainerName())
+	}, nil, nil, containerName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker container: %v", err)
 	}
 
 	return &DockerContainer{
 		ID:         resp.ID,
-		Name:       opts.Name,
+		Name:       containerName,
 		Port:       opts.Port,
 		WorkingDir: DefaultWorkspace,
+		ctx:        ctx,
+		client:     client,
 	}, nil
 }
 
