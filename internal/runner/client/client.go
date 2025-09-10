@@ -11,7 +11,7 @@ type MicroCIClient interface {
 	Register(ctx context.Context, machineId string) error
 	Unregister(ctx context.Context, machineId string) error
 	FetchJob(ctx context.Context, machineId string) (*pipeline.Job, error)
-	UpdateJobStatus(ctx context.Context, jobId string, status common.JobStatus) error
-	// StreamLogs()
+	UpdateJobStatus(ctx context.Context, jobRunId string, status common.JobStatus) error
+	StreamLogs(ctx context.Context, jobRunId, line string) error
 	Close() error
 }

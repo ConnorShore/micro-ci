@@ -142,7 +142,7 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusRunning)
+	err := m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusRunning)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
 	}
@@ -157,10 +157,10 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 	var status common.JobStatus
 	success := true
 	if success {
-		err = m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusSuccess)
+		err = m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusSuccess)
 		status = common.StatusSuccess
 	} else {
-		err = m.mciClient.UpdateJobStatus(ctx, j.Id, common.StatusFailed)
+		err = m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusFailed)
 		status = common.StatusFailed
 	}
 	if err != nil {
@@ -208,40 +208,41 @@ func (m *Machine) spinUpContainerAndRunSteps(j *pipeline.Job) error {
 // Runs all the steps for a job in the specified container
 func (m *Machine) runAllSteps(ctx context.Context, j *pipeline.Job, id string) error {
 	for _, s := range j.Steps {
-		log.Printf("\n---- Running Step [%v] ----\n", s.Name)
+		fmt.Printf("\n---- Running Step [%v] ----\n", s.Name)
 		run, err := canRun(s.Condition)
 		if err != nil {
 			log.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
-			log.Println(strings.Repeat("-", 60))
+			fmt.Println(strings.Repeat("-", 60))
 			continue
 		}
 
 		if !run {
 			log.Printf("Skipping step [%v].\n", s.Name)
-			log.Println(strings.Repeat("-", 60))
+			fmt.Println(strings.Repeat("-", 60))
 			continue
 		}
 
-		_, err = m.runStep(ctx, s, common.MergeVariables(j.Variables, s.Variables), id)
+		_, err = m.runStep(ctx, s, common.MergeVariables(j.Variables, s.Variables), id, j.RunId)
 		if err != nil && !s.ContinueOnError {
 			log.Printf("Exiting due to error on step [%v+]\n", s)
 			return err
 		}
-		log.Println(strings.Repeat("-", 60))
+		fmt.Println(strings.Repeat("-", 60))
 	}
 
 	return nil
 }
 
 // runs an individual step in a job
-func (m *Machine) runStep(ctx context.Context, s pipeline.Step, vars common.VariableMap, id string) (bool, error) {
+func (m *Machine) runStep(ctx context.Context, s pipeline.Step, vars common.VariableMap, containerID, jobRunId string) (bool, error) {
 	if err := m.executor.Execute(executor.ExecutorOpts{
 		Ctx:           ctx,
 		Script:        s.Script,
 		Vars:          vars,
-		EnvironmentId: id,
+		EnvironmentId: containerID,
 	}, func(line string) {
-		fmt.Println("Execute job log: ", line)
+		fmt.Printf("[Machine: %v] Execute job log: %v\n", m.Name, line)
+		m.mciClient.StreamLogs(ctx, jobRunId, line)
 	}); err != nil {
 		return false, fmt.Errorf("failed to run step [%v]: %v", s.Name, err)
 	}

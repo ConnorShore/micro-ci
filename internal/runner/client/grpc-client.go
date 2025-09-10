@@ -66,7 +66,7 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.
 	}
 
 	return &pipeline.Job{
-		Id:        res.Job.Id,
+		RunId:     res.Job.RunId,
 		Name:      res.Job.Name,
 		Condition: res.Job.Condition,
 		Variables: res.Job.Variables,
@@ -75,10 +75,18 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.
 	}, nil
 }
 
-func (c *grpcClient) UpdateJobStatus(ctx context.Context, jobId string, status common.JobStatus) error {
+func (c *grpcClient) UpdateJobStatus(ctx context.Context, jobRunId string, status common.JobStatus) error {
 	_, err := c.client.UpdateJobStatus(ctx, &micro_ci.UpdateJobStatusRequest{
-		JobRunId: jobId,
+		JobRunId: jobRunId,
 		Status:   string(status),
+	})
+	return err
+}
+
+func (c *grpcClient) StreamLogs(ctx context.Context, jobRunId, line string) error {
+	_, err := c.client.StreamLogs(ctx, &micro_ci.StreamLogsRequest{
+		JobRunId: jobRunId,
+		LogData:  line,
 	})
 	return err
 }

@@ -41,9 +41,9 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 	var jobStatus = make(map[string]common.JobStatus, 0)
 	jobQ := make(chan pipeline.Job, 100)
 	for _, j := range p.Jobs {
-		j.Id = uuid.NewString()
+		j.RunId = uuid.NewString()
 		j.Variables = common.MergeVariables(p.Variables, j.Variables)
-		jobStatus[j.Id] = common.StatusPending
+		jobStatus[j.RunId] = common.StatusPending
 		jobQ <- j
 	}
 
@@ -95,9 +95,9 @@ func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.Unregister
 func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) {
 	select {
 	case j := <-s.jobCh:
-		log.Printf("Recieved job from channel: %+v\n", j.Name)
+		log.Printf("Fetched Job [%v] for runner [%v]\n", j.Name, req.MachineId)
 
-		s.jobMachineMap[j.Id] = req.MachineId
+		s.jobMachineMap[j.RunId] = req.MachineId
 
 		return &micro_ci.FetchJobResponse{
 			Job: s.convertJobToProtoJob(j),
@@ -125,10 +125,13 @@ func (s *MicroCIServer) UpdateJobStatus(ctx context.Context, req *micro_ci.Updat
 	}, nil
 }
 
-// // Stream logs from the runner to the CI server
-// func (s *MicroCIServer) StreamLogs(ctx context.Context, req *micro_ci.StreamLogsRequest) (*micro_ci.StreamLogsResponse, error) {
-
-// }
+// Stream logs from the runner to the CI server
+func (s *MicroCIServer) StreamLogs(ctx context.Context, req *micro_ci.StreamLogsRequest) (*micro_ci.StreamLogsResponse, error) {
+	log.Printf("[Server] [JobID: %v]: %v\n", req.JobRunId, req.LogData)
+	return &micro_ci.StreamLogsResponse{
+		Success: true,
+	}, nil
+}
 
 func (s *MicroCIServer) convertJobToProtoJob(j pipeline.Job) *micro_ci.Job {
 	var steps []*micro_ci.Step
@@ -145,7 +148,7 @@ func (s *MicroCIServer) convertJobToProtoJob(j pipeline.Job) *micro_ci.Job {
 	}
 
 	return &micro_ci.Job{
-		Id:        j.Id,
+		RunId:     j.RunId,
 		Name:      j.Name,
 		Condition: j.Condition,
 		Variables: j.Variables,

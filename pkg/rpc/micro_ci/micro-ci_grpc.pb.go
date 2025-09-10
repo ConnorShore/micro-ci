@@ -23,6 +23,7 @@ const (
 	MicroCI_Unregister_FullMethodName      = "/micro_ci.MicroCI/Unregister"
 	MicroCI_FetchJob_FullMethodName        = "/micro_ci.MicroCI/FetchJob"
 	MicroCI_UpdateJobStatus_FullMethodName = "/micro_ci.MicroCI/UpdateJobStatus"
+	MicroCI_StreamLogs_FullMethodName      = "/micro_ci.MicroCI/StreamLogs"
 )
 
 // MicroCIClient is the client API for MicroCI service.
@@ -39,6 +40,8 @@ type MicroCIClient interface {
 	FetchJob(ctx context.Context, in *FetchJobRequest, opts ...grpc.CallOption) (*FetchJobResponse, error)
 	// Update the status of a job
 	UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error)
+	// Stream logs from the runner to the CI server
+	StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (*StreamLogsResponse, error)
 }
 
 type microCIClient struct {
@@ -89,6 +92,16 @@ func (c *microCIClient) UpdateJobStatus(ctx context.Context, in *UpdateJobStatus
 	return out, nil
 }
 
+func (c *microCIClient) StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (*StreamLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StreamLogsResponse)
+	err := c.cc.Invoke(ctx, MicroCI_StreamLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MicroCIServer is the server API for MicroCI service.
 // All implementations must embed UnimplementedMicroCIServer
 // for forward compatibility.
@@ -103,6 +116,8 @@ type MicroCIServer interface {
 	FetchJob(context.Context, *FetchJobRequest) (*FetchJobResponse, error)
 	// Update the status of a job
 	UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error)
+	// Stream logs from the runner to the CI server
+	StreamLogs(context.Context, *StreamLogsRequest) (*StreamLogsResponse, error)
 	mustEmbedUnimplementedMicroCIServer()
 }
 
@@ -124,6 +139,9 @@ func (UnimplementedMicroCIServer) FetchJob(context.Context, *FetchJobRequest) (*
 }
 func (UnimplementedMicroCIServer) UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateJobStatus not implemented")
+}
+func (UnimplementedMicroCIServer) StreamLogs(context.Context, *StreamLogsRequest) (*StreamLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StreamLogs not implemented")
 }
 func (UnimplementedMicroCIServer) mustEmbedUnimplementedMicroCIServer() {}
 func (UnimplementedMicroCIServer) testEmbeddedByValue()                 {}
@@ -218,6 +236,24 @@ func _MicroCI_UpdateJobStatus_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MicroCI_StreamLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StreamLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MicroCIServer).StreamLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MicroCI_StreamLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MicroCIServer).StreamLogs(ctx, req.(*StreamLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MicroCI_ServiceDesc is the grpc.ServiceDesc for MicroCI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -240,6 +276,10 @@ var MicroCI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateJobStatus",
 			Handler:    _MicroCI_UpdateJobStatus_Handler,
+		},
+		{
+			MethodName: "StreamLogs",
+			Handler:    _MicroCI_StreamLogs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

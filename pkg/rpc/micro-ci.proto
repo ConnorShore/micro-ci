@@ -19,7 +19,7 @@ service  MicroCI {
     rpc UpdateJobStatus(UpdateJobStatusRequest) returns (UpdateJobStatusResponse);
 
     // Stream logs from the runner to the CI server
-    // rpc StreamLogs(StreamLogsRequest) returns (StreamLogsResponse);
+    rpc StreamLogs(StreamLogsRequest) returns (StreamLogsResponse);
 }
 
 message Step {
@@ -31,7 +31,7 @@ message Step {
 }
 
 message Job {
-    string id = 1;
+    string run_id = 1;
     string name = 2;
     string condition = 3;
     map<string, string> variables = 4;
@@ -73,11 +73,11 @@ message UpdateJobStatusResponse {
     bool success = 1;
 }
 
-// message StreamLogsRequest {
-//     string job_run_id = 1;
-//     string log_data = 2;
-// }
+message StreamLogsRequest {
+    string job_run_id = 1;
+    string log_data = 2;
+}
 
-// message StreamLogsResponse {
-//     bool success = 1;
-// }
+message StreamLogsResponse {
+    bool success = 1;
+}

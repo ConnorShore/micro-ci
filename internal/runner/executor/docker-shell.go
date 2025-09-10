@@ -2,7 +2,6 @@ package executor
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"os/exec"
 	"syscall"
@@ -42,7 +41,7 @@ func (e *DockerShellExecutor) Execute(opts ExecutorOpts, onStdOut func(line stri
 	// Merge stdout and stderr to process them together.
 	multiReader := io.MultiReader(stdout, stderr)
 
-	fmt.Printf("Running the command: %+v\n", cmd)
+	// Execute the command
 	if err := cmd.Start(); err != nil {
 		return err
 	}
