@@ -10,20 +10,20 @@ jobs:
     variables:
       JOB_1_VAR: job1-tester
     steps:
-      - name: Display Message
+      - name: Display First Message
         script: |
           echo "Running Micro CI Pipeline Test"
-
-      - name: Project directory files
-        script: |
-          echo "Listing project directory files"
-          ls
+          echo "Here is another line during that test"
 
       - name: Failure Step Example
         continueOnError: true
         script: |
           echo "This pipeline should not exit due to a bash script failure
           asdfkjkqek ;k;kl
+
+      - name: Display Final Message
+        script: |
+          echo "This is the final message from the first job in the Micro CI Pipeline Test"
 
   - job: Second Job in Pipeline
     image: alpine:latest
@@ -36,14 +36,16 @@ jobs:
 
       - name: Show Local Variales and Environment Variables
         variables:
-          LOCAL_VAR: tester
+          TEST_VAR: tester
         script: |
-          echo "Local Variable: $LOCAL_VAR"
+          echo "This step is showing local variables and environment variables"
+          echo "Job Variable JOB_1_VAR: $JOB_1_VAR"
+          echo "Local Variable TEST_VAR: $TEST_VAR"
           echo "Environment Variable GO_ENV: $GO_ENV"
           echo "Environment Variable APP_VERSION: $APP_VERSION"
 
       - name: Try Show Local Variable in another step
         script: |
-          echo "Trying to access LOCAL_VAR from previous step: $LOCAL_VAR"
+          echo "Trying to access TEST_VAR from previous step: $TEST_VAR"
           echo "Job Variable JOB_1_VAR: $JOB_1_VAR"
           echo "Job Variable JOB_2_VAR: $JOB_2_VAR"

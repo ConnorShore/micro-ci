@@ -10,10 +10,9 @@ import (
 
 type ExecutorOpts struct {
 	Ctx           context.Context
+	EnvironmentId string
 	Script        pipeline.Script
 	Vars          common.VariableMap
-	EnvironmentId string // any potential runner environment id
-	Client        any    // any client needed for execution
 }
 
 type Executor interface {

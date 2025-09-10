@@ -42,6 +42,7 @@ func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
 	jobQ := make(chan pipeline.Job, 100)
 	for _, j := range p.Jobs {
 		j.Id = uuid.NewString()
+		j.Variables = common.MergeVariables(p.Variables, j.Variables)
 		jobStatus[j.Id] = common.StatusPending
 		jobQ <- j
 	}
@@ -92,10 +93,9 @@ func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.Unregister
 
 // Fetch a job for the registered runner to execute
 func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) {
-	log.Printf("Fetch Job request from machine: %v\n", req.MachineId)
 	select {
 	case j := <-s.jobCh:
-		log.Printf("Recieved job from channel: %+v\n", j)
+		log.Printf("Recieved job from channel: %+v\n", j.Name)
 
 		s.jobMachineMap[j.Id] = req.MachineId
 

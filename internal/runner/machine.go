@@ -17,6 +17,10 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	DefaultWorkingDir = "microci-runner-env"
+)
+
 type Machine struct {
 	ID               string
 	Name             string
@@ -35,7 +39,7 @@ func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executo
 		return nil, fmt.Errorf("failed to start docker client: %v", err)
 	}
 
-	dir, err := os.MkdirTemp("", "microci-runner-env")
+	dir, err := os.MkdirTemp("", DefaultWorkingDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create micro-ci runner environment: %v", err)
 	}
@@ -218,7 +222,7 @@ func (m *Machine) runAllSteps(ctx context.Context, j *pipeline.Job, id string) e
 			continue
 		}
 
-		_, err = m.runStep(ctx, s, j.Variables, id)
+		_, err = m.runStep(ctx, s, common.MergeVariables(j.Variables, s.Variables), id)
 		if err != nil && !s.ContinueOnError {
 			log.Printf("Exiting due to error on step [%v+]\n", s)
 			return err
@@ -230,13 +234,12 @@ func (m *Machine) runAllSteps(ctx context.Context, j *pipeline.Job, id string) e
 }
 
 // runs an individual step in a job
-func (m *Machine) runStep(ctx context.Context, s pipeline.Step, jobVars common.VariableMap, id string) (bool, error) {
+func (m *Machine) runStep(ctx context.Context, s pipeline.Step, vars common.VariableMap, id string) (bool, error) {
 	if err := m.executor.Execute(executor.ExecutorOpts{
 		Ctx:           ctx,
 		Script:        s.Script,
-		Vars:          common.MergeVariables(jobVars, s.Variables),
+		Vars:          vars,
 		EnvironmentId: id,
-		Client:        m.dockerClient,
 	}, func(line string) {
 		fmt.Println("Execute job log: ", line)
 	}); err != nil {
