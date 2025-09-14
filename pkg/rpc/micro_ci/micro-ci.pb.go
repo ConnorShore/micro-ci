@@ -98,13 +98,14 @@ func (x *Step) GetScript() string {
 }
 
 type Job struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RunId         string                 `protobuf:"bytes,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Condition     string                 `protobuf:"bytes,3,opt,name=condition,proto3" json:"condition,omitempty"`
-	Variables     map[string]string      `protobuf:"bytes,4,rep,name=variables,proto3" json:"variables,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Image         string                 `protobuf:"bytes,5,opt,name=image,proto3" json:"image,omitempty"`
-	Steps         []*Step                `protobuf:"bytes,6,rep,name=steps,proto3" json:"steps,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	RunId string                 `protobuf:"bytes,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
+	Name  string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// Types that are valid to be assigned to JobType:
+	//
+	//	*Job_PipelineJob_
+	//	*Job_BootstrapJob_
+	JobType       isJob_JobType `protobuf_oneof:"job_type"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -153,33 +154,46 @@ func (x *Job) GetName() string {
 	return ""
 }
 
-func (x *Job) GetCondition() string {
+func (x *Job) GetJobType() isJob_JobType {
 	if x != nil {
-		return x.Condition
-	}
-	return ""
-}
-
-func (x *Job) GetVariables() map[string]string {
-	if x != nil {
-		return x.Variables
+		return x.JobType
 	}
 	return nil
 }
 
-func (x *Job) GetImage() string {
+func (x *Job) GetPipelineJob() *Job_PipelineJob {
 	if x != nil {
-		return x.Image
-	}
-	return ""
-}
-
-func (x *Job) GetSteps() []*Step {
-	if x != nil {
-		return x.Steps
+		if x, ok := x.JobType.(*Job_PipelineJob_); ok {
+			return x.PipelineJob
+		}
 	}
 	return nil
 }
+
+func (x *Job) GetBootstrapJob() *Job_BootstrapJob {
+	if x != nil {
+		if x, ok := x.JobType.(*Job_BootstrapJob_); ok {
+			return x.BootstrapJob
+		}
+	}
+	return nil
+}
+
+type isJob_JobType interface {
+	isJob_JobType()
+}
+
+type Job_PipelineJob_ struct {
+	PipelineJob *Job_PipelineJob `protobuf:"bytes,3,opt,name=pipeline_job,json=pipelineJob,proto3,oneof"`
+}
+
+type Job_BootstrapJob_ struct {
+	BootstrapJob *Job_BootstrapJob `protobuf:"bytes,4,opt,name=bootstrap_job,json=bootstrapJob,proto3,oneof"`
+}
+
+func (*Job_PipelineJob_) isJob_JobType() {}
+
+func (*Job_BootstrapJob_) isJob_JobType() {}
 
 // Message definitions
 type RegisterRequest struct {
@@ -638,6 +652,134 @@ func (x *StreamLogsResponse) GetSuccess() bool {
 	return false
 }
 
+type Job_PipelineJob struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Condition     string                 `protobuf:"bytes,3,opt,name=condition,proto3" json:"condition,omitempty"`
+	Variables     map[string]string      `protobuf:"bytes,4,rep,name=variables,proto3" json:"variables,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Image         string                 `protobuf:"bytes,5,opt,name=image,proto3" json:"image,omitempty"`
+	Steps         []*Step                `protobuf:"bytes,6,rep,name=steps,proto3" json:"steps,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Job_PipelineJob) Reset() {
+	*x = Job_PipelineJob{}
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Job_PipelineJob) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Job_PipelineJob) ProtoMessage() {}
+
+func (x *Job_PipelineJob) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Job_PipelineJob.ProtoReflect.Descriptor instead.
+func (*Job_PipelineJob) Descriptor() ([]byte, []int) {
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{1, 0}
+}
+
+func (x *Job_PipelineJob) GetCondition() string {
+	if x != nil {
+		return x.Condition
+	}
+	return ""
+}
+
+func (x *Job_PipelineJob) GetVariables() map[string]string {
+	if x != nil {
+		return x.Variables
+	}
+	return nil
+}
+
+func (x *Job_PipelineJob) GetImage() string {
+	if x != nil {
+		return x.Image
+	}
+	return ""
+}
+
+func (x *Job_PipelineJob) GetSteps() []*Step {
+	if x != nil {
+		return x.Steps
+	}
+	return nil
+}
+
+type Job_BootstrapJob struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RepoUrl       string                 `protobuf:"bytes,7,opt,name=repo_url,json=repoUrl,proto3" json:"repo_url,omitempty"`
+	CommitSha     string                 `protobuf:"bytes,8,opt,name=commit_sha,json=commitSha,proto3" json:"commit_sha,omitempty"`
+	Branch        string                 `protobuf:"bytes,9,opt,name=branch,proto3" json:"branch,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Job_BootstrapJob) Reset() {
+	*x = Job_BootstrapJob{}
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Job_BootstrapJob) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Job_BootstrapJob) ProtoMessage() {}
+
+func (x *Job_BootstrapJob) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Job_BootstrapJob.ProtoReflect.Descriptor instead.
+func (*Job_BootstrapJob) Descriptor() ([]byte, []int) {
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{1, 1}
+}
+
+func (x *Job_BootstrapJob) GetRepoUrl() string {
+	if x != nil {
+		return x.RepoUrl
+	}
+	return ""
+}
+
+func (x *Job_BootstrapJob) GetCommitSha() string {
+	if x != nil {
+		return x.CommitSha
+	}
+	return ""
+}
+
+func (x *Job_BootstrapJob) GetBranch() string {
+	if x != nil {
+		return x.Branch
+	}
+	return ""
+}
+
 var File_pkg_rpc_micro_ci_proto protoreflect.FileDescriptor
 
 const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
@@ -651,17 +793,27 @@ const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
 	"\x06script\x18\x05 \x01(\tR\x06script\x1a<\n" +
 	"\x0eVariablesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x84\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x91\x04\n" +
 	"\x03Job\x12\x15\n" +
 	"\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
-	"\tcondition\x18\x03 \x01(\tR\tcondition\x12:\n" +
-	"\tvariables\x18\x04 \x03(\v2\x1c.micro_ci.Job.VariablesEntryR\tvariables\x12\x14\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12>\n" +
+	"\fpipeline_job\x18\x03 \x01(\v2\x19.micro_ci.Job.PipelineJobH\x00R\vpipelineJob\x12A\n" +
+	"\rbootstrap_job\x18\x04 \x01(\v2\x1a.micro_ci.Job.BootstrapJobH\x00R\fbootstrapJob\x1a\xed\x01\n" +
+	"\vPipelineJob\x12\x1c\n" +
+	"\tcondition\x18\x03 \x01(\tR\tcondition\x12F\n" +
+	"\tvariables\x18\x04 \x03(\v2(.micro_ci.Job.PipelineJob.VariablesEntryR\tvariables\x12\x14\n" +
 	"\x05image\x18\x05 \x01(\tR\x05image\x12$\n" +
 	"\x05steps\x18\x06 \x03(\v2\x0e.micro_ci.StepR\x05steps\x1a<\n" +
 	"\x0eVariablesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"0\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a`\n" +
+	"\fBootstrapJob\x12\x19\n" +
+	"\brepo_url\x18\a \x01(\tR\arepoUrl\x12\x1d\n" +
+	"\n" +
+	"commit_sha\x18\b \x01(\tR\tcommitSha\x12\x16\n" +
+	"\x06branch\x18\t \x01(\tR\x06branchB\n" +
+	"\n" +
+	"\bjob_type\"0\n" +
 	"\x0fRegisterRequest\x12\x1d\n" +
 	"\n" +
 	"machine_id\x18\x01 \x01(\tR\tmachineId\",\n" +
@@ -710,7 +862,7 @@ func file_pkg_rpc_micro_ci_proto_rawDescGZIP() []byte {
 	return file_pkg_rpc_micro_ci_proto_rawDescData
 }
 
-var file_pkg_rpc_micro_ci_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_pkg_rpc_micro_ci_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_pkg_rpc_micro_ci_proto_goTypes = []any{
 	(*Step)(nil),                    // 0: micro_ci.Step
 	(*Job)(nil),                     // 1: micro_ci.Job
@@ -725,28 +877,32 @@ var file_pkg_rpc_micro_ci_proto_goTypes = []any{
 	(*StreamLogsRequest)(nil),       // 10: micro_ci.StreamLogsRequest
 	(*StreamLogsResponse)(nil),      // 11: micro_ci.StreamLogsResponse
 	nil,                             // 12: micro_ci.Step.VariablesEntry
-	nil,                             // 13: micro_ci.Job.VariablesEntry
+	(*Job_PipelineJob)(nil),         // 13: micro_ci.Job.PipelineJob
+	(*Job_BootstrapJob)(nil),        // 14: micro_ci.Job.BootstrapJob
+	nil,                             // 15: micro_ci.Job.PipelineJob.VariablesEntry
 }
 var file_pkg_rpc_micro_ci_proto_depIdxs = []int32{
 	12, // 0: micro_ci.Step.variables:type_name -> micro_ci.Step.VariablesEntry
-	13, // 1: micro_ci.Job.variables:type_name -> micro_ci.Job.VariablesEntry
-	0,  // 2: micro_ci.Job.steps:type_name -> micro_ci.Step
+	13, // 1: micro_ci.Job.pipeline_job:type_name -> micro_ci.Job.PipelineJob
+	14, // 2: micro_ci.Job.bootstrap_job:type_name -> micro_ci.Job.BootstrapJob
 	1,  // 3: micro_ci.FetchJobResponse.job:type_name -> micro_ci.Job
-	2,  // 4: micro_ci.MicroCI.Register:input_type -> micro_ci.RegisterRequest
-	4,  // 5: micro_ci.MicroCI.Unregister:input_type -> micro_ci.UnregisterRequest
-	6,  // 6: micro_ci.MicroCI.FetchJob:input_type -> micro_ci.FetchJobRequest
-	8,  // 7: micro_ci.MicroCI.UpdateJobStatus:input_type -> micro_ci.UpdateJobStatusRequest
-	10, // 8: micro_ci.MicroCI.StreamLogs:input_type -> micro_ci.StreamLogsRequest
-	3,  // 9: micro_ci.MicroCI.Register:output_type -> micro_ci.RegisterResponse
-	5,  // 10: micro_ci.MicroCI.Unregister:output_type -> micro_ci.UnregisterResponse
-	7,  // 11: micro_ci.MicroCI.FetchJob:output_type -> micro_ci.FetchJobResponse
-	9,  // 12: micro_ci.MicroCI.UpdateJobStatus:output_type -> micro_ci.UpdateJobStatusResponse
-	11, // 13: micro_ci.MicroCI.StreamLogs:output_type -> micro_ci.StreamLogsResponse
-	9,  // [9:14] is the sub-list for method output_type
-	4,  // [4:9] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	15, // 4: micro_ci.Job.PipelineJob.variables:type_name -> micro_ci.Job.PipelineJob.VariablesEntry
+	0,  // 5: micro_ci.Job.PipelineJob.steps:type_name -> micro_ci.Step
+	2,  // 6: micro_ci.MicroCI.Register:input_type -> micro_ci.RegisterRequest
+	4,  // 7: micro_ci.MicroCI.Unregister:input_type -> micro_ci.UnregisterRequest
+	6,  // 8: micro_ci.MicroCI.FetchJob:input_type -> micro_ci.FetchJobRequest
+	8,  // 9: micro_ci.MicroCI.UpdateJobStatus:input_type -> micro_ci.UpdateJobStatusRequest
+	10, // 10: micro_ci.MicroCI.StreamLogs:input_type -> micro_ci.StreamLogsRequest
+	3,  // 11: micro_ci.MicroCI.Register:output_type -> micro_ci.RegisterResponse
+	5,  // 12: micro_ci.MicroCI.Unregister:output_type -> micro_ci.UnregisterResponse
+	7,  // 13: micro_ci.MicroCI.FetchJob:output_type -> micro_ci.FetchJobResponse
+	9,  // 14: micro_ci.MicroCI.UpdateJobStatus:output_type -> micro_ci.UpdateJobStatusResponse
+	11, // 15: micro_ci.MicroCI.StreamLogs:output_type -> micro_ci.StreamLogsResponse
+	11, // [11:16] is the sub-list for method output_type
+	6,  // [6:11] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_pkg_rpc_micro_ci_proto_init() }
@@ -754,13 +910,17 @@ func file_pkg_rpc_micro_ci_proto_init() {
 	if File_pkg_rpc_micro_ci_proto != nil {
 		return
 	}
+	file_pkg_rpc_micro_ci_proto_msgTypes[1].OneofWrappers = []any{
+		(*Job_PipelineJob_)(nil),
+		(*Job_BootstrapJob_)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_rpc_micro_ci_proto_rawDesc), len(file_pkg_rpc_micro_ci_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

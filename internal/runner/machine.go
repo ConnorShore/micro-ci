@@ -124,15 +124,17 @@ func (m *Machine) pollForJobs() {
 		return
 	}
 
-	log.Printf("Machine [%v] found job [%v]...\n", m.Name, job.Name)
+	log.Printf("Machine [%v] found job [%v]...\n", m.Name, job.GetName())
 
 	// Job was found, run it
 	if err := m.runJob(job); err != nil {
-		log.Printf("Failed to execute job [%v]: %v\n", job.Name, err)
+		log.Printf("Failed to execute job [%v]: %v\n", job.GetName(), err)
 	}
 }
 
-func (m *Machine) runJob(j *pipeline.Job) error {
+func (m *Machine) runJob(j common.Job) error {
+	fmt.Printf("Running job: %v\n", j.GetName())
+
 	m.State = common.StateBusy
 	defer func() {
 		m.State = common.StateIdle
@@ -142,7 +144,7 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusRunning)
+	err := m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusRunning)
 	if err != nil {
 		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
 	}
@@ -157,10 +159,10 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 	var status common.JobStatus
 	success := true
 	if success {
-		err = m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusSuccess)
+		err = m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusSuccess)
 		status = common.StatusSuccess
 	} else {
-		err = m.mciClient.UpdateJobStatus(ctx, j.RunId, common.StatusFailed)
+		err = m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusFailed)
 		status = common.StatusFailed
 	}
 	if err != nil {
@@ -171,7 +173,25 @@ func (m *Machine) runJob(j *pipeline.Job) error {
 }
 
 // spins up a container and runs the job's steps. will stop/remove container once finished
-func (m *Machine) spinUpContainerAndRunSteps(j *pipeline.Job) error {
+func (m *Machine) spinUpContainerAndRunSteps(j common.Job) error {
+	// TODO: Split up logic to run pipeline job and bootstrap job
+
+	switch j.GetType() {
+	case common.TypeBootstrap:
+		return m.runBootstrapJob(j.(*common.BootstrapJob))
+	case common.TypePipeline:
+		return m.runPipelineJob(j.(*pipeline.Job))
+	default:
+		return fmt.Errorf("unknown job type to run on machine. Job type = %v", j.GetType())
+	}
+}
+
+func (m *Machine) runBootstrapJob(j *common.BootstrapJob) error {
+	fmt.Printf("Running bootstrap job: %+v\n", *j)
+	return nil
+}
+
+func (m *Machine) runPipelineJob(j *pipeline.Job) error {
 	options := DockerContainerOptions{
 		Image:      j.Image,
 		Port:       "8080",

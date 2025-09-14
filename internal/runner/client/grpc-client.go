@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
@@ -43,7 +44,7 @@ func (c *grpcClient) Unregister(ctx context.Context, machineId string) error {
 	return err
 }
 
-func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.Job, error) {
+func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (common.Job, error) {
 	res, err := c.client.FetchJob(ctx, &micro_ci.FetchJobRequest{MachineId: machineId})
 	if err != nil {
 		return nil, err
@@ -53,26 +54,14 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (*pipeline.
 		return nil, nil
 	}
 
-	var steps []pipeline.Step
-	for _, s := range res.Job.Steps {
-		step := pipeline.Step{
-			Name:            s.Name,
-			Condition:       s.Condition,
-			Variables:       s.Variables,
-			ContinueOnError: s.ContinueOnError,
-			Script:          pipeline.Script(s.Script),
-		}
-		steps = append(steps, step)
+	switch t := res.Job.JobType.(type) {
+	case *micro_ci.Job_BootstrapJob_:
+		return c.convertProtoJobToBootstrapJob(res.Job)
+	case *micro_ci.Job_PipelineJob_:
+		return c.convertProtoJobToPipelineJob(res.Job)
+	default:
+		return nil, fmt.Errorf("unknown type when fetching job [%+v]", t)
 	}
-
-	return &pipeline.Job{
-		RunId:     res.Job.RunId,
-		Name:      res.Job.Name,
-		Condition: res.Job.Condition,
-		Variables: res.Job.Variables,
-		Image:     res.Job.Image,
-		Steps:     steps,
-	}, nil
 }
 
 func (c *grpcClient) UpdateJobStatus(ctx context.Context, jobRunId string, status common.JobStatus) error {
@@ -93,4 +82,41 @@ func (c *grpcClient) StreamLogs(ctx context.Context, jobRunId, line string) erro
 
 func (c *grpcClient) Close() error {
 	return c.conn.Close()
+}
+
+func (c *grpcClient) convertProtoJobToBootstrapJob(j *micro_ci.Job) (*common.BootstrapJob, error) {
+	bj := j.GetBootstrapJob()
+	return &common.BootstrapJob{
+		BaseJob: common.BaseJob{
+			Name:  j.Name,
+			RunId: j.RunId,
+		},
+		RepoURL:   bj.RepoUrl,
+		CommitSha: bj.CommitSha,
+		Branch:    bj.Branch,
+	}, nil
+}
+
+func (c *grpcClient) convertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
+	var steps []pipeline.Step
+
+	pj := j.GetPipelineJob()
+	for _, s := range pj.Steps {
+		step := pipeline.Step{
+			Condition:       s.Condition,
+			Variables:       s.Variables,
+			ContinueOnError: s.ContinueOnError,
+			Script:          pipeline.Script(s.Script),
+		}
+		steps = append(steps, step)
+	}
+
+	return &pipeline.Job{
+		Name:      j.Name,
+		RunId:     j.RunId,
+		Condition: pj.Condition,
+		Variables: pj.Variables,
+		Image:     pj.Image,
+		Steps:     steps,
+	}, nil
 }

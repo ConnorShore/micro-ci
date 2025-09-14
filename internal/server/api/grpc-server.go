@@ -9,8 +9,8 @@ import (
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
+	"github.com/ConnorShore/micro-ci/internal/server/scheduler"
 	"github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
-	"github.com/google/uuid"
 	"google.golang.org/grpc"
 )
 
@@ -18,38 +18,24 @@ type MicroCIServer struct {
 	micro_ci.UnimplementedMicroCIServer
 
 	// TODO: Better approach (db or message queue)
-	jobCh chan (pipeline.Job)
+	jobQ scheduler.JobQueue
 
 	// TODO: Move items to db
-	machines      []string
+	machines []string
+
+	// TODO: Make thread safe (sync.Map)
 	jobStatus     map[string]common.JobStatus // (jobId, jobStatus)
 	jobMachineMap map[string]string           // (jobRunId, machineId)
 
 	// TODO: Need to track when a pipeline is fully complete (all jobs complete/fail)
 }
 
-func NewMicroCIServer(testPipelineFile string) (*MicroCIServer, error) {
-
+func NewMicroCIServer(jq scheduler.JobQueue) (*MicroCIServer, error) {
 	// TODO: Pass in config props for making the server
 
-	// Temporary
-	p, err := pipeline.ParsePipeline(testPipelineFile)
-	if err != nil {
-		return nil, err
-	}
-
-	var jobStatus = make(map[string]common.JobStatus, 0)
-	jobQ := make(chan pipeline.Job, 100)
-	for _, j := range p.Jobs {
-		j.RunId = uuid.NewString()
-		j.Variables = common.MergeVariables(p.Variables, j.Variables)
-		jobStatus[j.RunId] = common.StatusPending
-		jobQ <- j
-	}
-
 	return &MicroCIServer{
-		jobCh:         jobQ,
-		jobStatus:     jobStatus,
+		jobQ:          jq,
+		jobStatus:     make(map[string]common.JobStatus),
 		jobMachineMap: make(map[string]string),
 	}, nil
 }
@@ -93,21 +79,19 @@ func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.Unregister
 
 // Fetch a job for the registered runner to execute
 func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) {
-	select {
-	case j := <-s.jobCh:
-		log.Printf("Fetched Job [%v] for runner [%v]\n", j.Name, req.MachineId)
-
-		s.jobMachineMap[j.RunId] = req.MachineId
-
-		return &micro_ci.FetchJobResponse{
-			Job: s.convertJobToProtoJob(j),
-		}, nil
-	default:
+	j := s.jobQ.Dequeue()
+	if j == nil {
 		return &micro_ci.FetchJobResponse{
 			Job: nil,
 		}, nil
 	}
 
+	log.Printf("Fetched Job [%v] for runner [%v]\n", j.GetName(), req.MachineId)
+	s.jobMachineMap[j.GetRunId()] = req.MachineId
+	s.jobStatus[j.GetRunId()] = common.StatusPending
+
+	job, err := s.convertJobToProtoJob(j)
+	return &micro_ci.FetchJobResponse{Job: job}, err
 }
 
 // Update the status of a job
@@ -133,7 +117,19 @@ func (s *MicroCIServer) StreamLogs(ctx context.Context, req *micro_ci.StreamLogs
 	}, nil
 }
 
-func (s *MicroCIServer) convertJobToProtoJob(j pipeline.Job) *micro_ci.Job {
+func (s *MicroCIServer) convertJobToProtoJob(j common.Job) (*micro_ci.Job, error) {
+	switch t := j.(type) {
+	case *pipeline.Job:
+		return s.convertPipelineJobToProtoJob(j.(*pipeline.Job)), nil
+	case *common.BootstrapJob:
+		return s.convertBootstrapJobToProtoJob(j.(*common.BootstrapJob)), nil
+	default:
+		return nil, fmt.Errorf("failed to convert job of type [%+v] to proto job", t)
+	}
+}
+
+func (s *MicroCIServer) convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
+	fmt.Printf("Converting pipeline job [%+v] to proto job\n", *j)
 	var steps []*micro_ci.Step
 	for _, s := range j.Steps {
 		ps := &micro_ci.Step{
@@ -147,12 +143,35 @@ func (s *MicroCIServer) convertJobToProtoJob(j pipeline.Job) *micro_ci.Job {
 		steps = append(steps, ps)
 	}
 
-	return &micro_ci.Job{
-		RunId:     j.RunId,
-		Name:      j.Name,
+	var pipelineJob = &micro_ci.Job_PipelineJob{
 		Condition: j.Condition,
 		Variables: j.Variables,
 		Image:     j.Image,
 		Steps:     steps,
+	}
+
+	return &micro_ci.Job{
+		RunId: j.GetRunId(),
+		Name:  j.Name,
+		JobType: &micro_ci.Job_PipelineJob_{
+			PipelineJob: pipelineJob,
+		},
+	}
+}
+
+func (s *MicroCIServer) convertBootstrapJobToProtoJob(j *common.BootstrapJob) *micro_ci.Job {
+	fmt.Printf("Converting bootstrap job [%+v] to proto job\n", *j)
+	var bootstrapJob = &micro_ci.Job_BootstrapJob{
+		RepoUrl:   j.RepoURL,
+		CommitSha: j.CommitSha,
+		Branch:    j.Branch,
+	}
+
+	return &micro_ci.Job{
+		RunId: j.GetRunId(),
+		Name:  j.Name,
+		JobType: &micro_ci.Job_BootstrapJob_{
+			BootstrapJob: bootstrapJob,
+		},
 	}
 }

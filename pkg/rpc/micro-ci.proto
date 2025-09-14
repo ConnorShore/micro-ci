@@ -33,10 +33,24 @@ message Step {
 message Job {
     string run_id = 1;
     string name = 2;
-    string condition = 3;
-    map<string, string> variables = 4;
-    string image = 5;
-    repeated Step steps = 6;
+
+    message PipelineJob {
+        string condition = 3;
+        map<string, string> variables = 4;
+        string image = 5;
+        repeated Step steps = 6;
+    }
+
+    message BootstrapJob {
+        string repo_url = 7;
+        string commit_sha = 8;
+        string branch = 9;
+    }
+
+    oneof job_type {
+        PipelineJob pipeline_job = 3;
+        BootstrapJob bootstrap_job = 4;
+    }
 }
 
 // Message definitions

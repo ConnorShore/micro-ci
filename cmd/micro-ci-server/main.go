@@ -8,18 +8,34 @@ import (
 	"syscall"
 
 	"github.com/ConnorShore/micro-ci/internal/server/api"
+	"github.com/ConnorShore/micro-ci/internal/server/scheduler"
+	"github.com/ConnorShore/micro-ci/internal/server/webhook"
+	"github.com/ConnorShore/micro-ci/internal/server/webhook/event"
 )
 
 func main() {
-	testScript := "./cmd/micro-ci-server/.micro-ci/micro-pipeline-test-docker.yaml"
-	mciServer, err := api.NewMicroCIServer(testScript)
+
+	var jobQ scheduler.JobQueue = scheduler.NewInMemoryJobQueue(100)
+
+	var githubWebhookHandler webhook.WebhookHandler = webhook.NewGithubWebhookHandler()
+	githubWebhookHandler.AddEventHandler(webhook.EventPush, event.NewGithubPushEventHandler())
+
+	webhookServer := api.NewWebhookServer(":4000", jobQ)
+	webhookServer.AddWebhook("/webhook/github", githubWebhookHandler)
+
+	mciServer, err := api.NewMicroCIServer(jobQ)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
-	// start the server
+	// start the mci server
 	go func() {
 		log.Fatal(mciServer.Start())
+	}()
+
+	// start the webhook server
+	go func() {
+		log.Fatal(webhookServer.Start())
 	}()
 
 	// handle safe shutdown
@@ -30,6 +46,7 @@ func main() {
 	fmt.Println("MicroCI Server is shutting down...")
 
 	// any shutdown/post-shutdown logic
+	log.Fatal(webhookServer.Shutdown())
 
 	fmt.Println("MicroCI Serveris shutdown.")
 }

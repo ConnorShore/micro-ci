@@ -25,6 +25,18 @@ type Job struct {
 	// DependsOn
 }
 
+func (j *Job) GetName() string {
+	return j.Name
+}
+
+func (j *Job) GetType() common.JobType {
+	return common.TypePipeline
+}
+
+func (j *Job) GetRunId() string {
+	return j.RunId
+}
+
 type Pipeline struct {
 	Name      string             `yaml:"name"`
 	Variables common.VariableMap `yaml:"variables"`
