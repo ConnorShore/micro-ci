@@ -17,8 +17,9 @@ import (
 )
 
 const (
-	DefaultWorkspace  string = "/workspace"
-	ContainerNameBase string = "microci-runner"
+	DefaultWorkspace       string        = "/workspace"
+	ContainerNameBase      string        = "microci-runner"
+	DefaultCreationTimeout time.Duration = 30
 )
 
 // Options for creating a new Docker container for running the job
@@ -41,6 +42,7 @@ type DockerContainer struct {
 
 func NewDockerContainer(client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) {
 	ctx := context.Background()
+
 	if err := pullImage(ctx, client, opts); err != nil {
 		return nil, err
 	}
@@ -51,8 +53,10 @@ func NewDockerContainer(client *client.Client, opts DockerContainerOptions) (*Do
 func (c *DockerContainer) Start() error {
 	log.Println("Starting Docker container with ID: ", c.ID)
 	if err := c.client.ContainerStart(c.ctx, c.ID, container.StartOptions{}); err != nil {
+		fmt.Printf("After start in ERROR....%s\n", err)
 		return fmt.Errorf("failed to start docker container: %v", err)
 	}
+	fmt.Println("After start....")
 
 	log.Println("Begin waiting for container initialization")
 	if err := c.waitForDockerContainerInitialization(); err != nil {
@@ -94,7 +98,7 @@ func (c *DockerContainer) waitForDockerContainerInitialization() error {
 		}
 
 		if resp.State.Running {
-			log.Println("Container is running.")
+			log.Printf("Container [%s] is running.\n", c.ID)
 			return nil
 		}
 

@@ -1,20 +1,16 @@
 package pipeline
 
 import (
-	"os"
+	"fmt"
 
 	"gopkg.in/yaml.v3"
 )
 
 // Given a filepath, parse the file into a Pipeline object
-func ParsePipeline(file string) (*Pipeline, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-
+func ParsePipeline(data []byte) (*Pipeline, error) {
+	fmt.Printf("PARSING PIPLINE DATA:\n%+v\n", string(data))
 	pipeline := &Pipeline{}
-	err = yaml.Unmarshal(data, pipeline)
+	err := yaml.Unmarshal(data, pipeline)
 	if err != nil {
 		return nil, err
 	}

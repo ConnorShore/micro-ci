@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
@@ -19,6 +20,8 @@ import (
 
 const (
 	DefaultWorkingDir = "microci-runner-env"
+	DefaultCloneDir   = "working-repo"
+	DefaultImage      = "golang:1.21-alpine"
 )
 
 type Machine struct {
@@ -174,8 +177,6 @@ func (m *Machine) runJob(j common.Job) error {
 
 // spins up a container and runs the job's steps. will stop/remove container once finished
 func (m *Machine) spinUpContainerAndRunSteps(j common.Job) error {
-	// TODO: Split up logic to run pipeline job and bootstrap job
-
 	switch j.GetType() {
 	case common.TypeBootstrap:
 		return m.runBootstrapJob(j.(*common.BootstrapJob))
@@ -187,7 +188,149 @@ func (m *Machine) spinUpContainerAndRunSteps(j common.Job) error {
 }
 
 func (m *Machine) runBootstrapJob(j *common.BootstrapJob) error {
-	fmt.Printf("Running bootstrap job: %+v\n", *j)
+	log.Printf("Running bootstrap job: %+v\n", *j)
+	options := DockerContainerOptions{
+		Image:      DefaultImage,
+		Port:       "8080",
+		WorkingDir: m.WorkingDirectory,
+	}
+
+	container, err := m.createAndStartDockerContainer(options)
+	if err != nil {
+		return err
+	}
+
+	// Remove clone directory after finishing method
+	defer func() {
+		log.Printf("Stopping and removing docker container: %s\n", container.ID)
+		m.stopAndRemoveDockerContainer(container)
+	}()
+
+	// Test command
+	log.Printf("Installing git")
+	script := "apk update && apk add git"
+	ctx := context.Background()
+	if err := m.executor.Execute(executor.ExecutorOpts{
+		Ctx:           ctx,
+		Script:        pipeline.Script(script),
+		EnvironmentId: container.ID,
+	}, func(line string) {
+		fmt.Printf("[Machine: %v] Execute bootstrap job log: %v\n", m.Name, line)
+		m.mciClient.StreamLogs(ctx, j.RunId, line)
+	}); err != nil {
+		return fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+	}
+
+	// Clone repository for specific sha or branch
+	log.Printf("Cloning repo: %s\n", j.RepoURL)
+	script = fmt.Sprintf("git clone %s %s", j.RepoURL, DefaultCloneDir)
+	ctx = context.Background()
+	if err := m.executor.Execute(executor.ExecutorOpts{
+		Ctx:           ctx,
+		Script:        pipeline.Script(script),
+		EnvironmentId: container.ID,
+	}, func(line string) {
+		fmt.Printf("[Machine: %v] Execute bootstrap job log: %v\n", m.Name, line)
+		m.mciClient.StreamLogs(ctx, j.RunId, line)
+	}); err != nil {
+		return fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+	}
+
+	// TODO: Verify the triggers for the pipeline match the bootstrap job event
+	log.Printf("Extracting pipelineFiles")
+	var pipelineFiles []string
+	script = fmt.Sprintf("cd %s/%s && ls", DefaultCloneDir, pipeline.PipelineDir)
+	ctx = context.Background()
+	if err := m.executor.Execute(executor.ExecutorOpts{
+		Ctx:           ctx,
+		Script:        pipeline.Script(script),
+		EnvironmentId: container.ID,
+	}, func(line string) {
+		fmt.Printf("[Machine: %v] Execute bootstrap job log: %v\n", m.Name, line)
+		m.mciClient.StreamLogs(ctx, j.RunId, line)
+		pipelineFiles = append(pipelineFiles, line)
+	}); err != nil {
+		return fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+	}
+
+	log.Printf("Pipeline files: %+v\nTesting ls\n", pipelineFiles)
+
+	script = "ls"
+	ctx = context.Background()
+	if err := m.executor.Execute(executor.ExecutorOpts{
+		Ctx:           ctx,
+		Script:        pipeline.Script(script),
+		EnvironmentId: container.ID,
+	}, func(line string) {
+		fmt.Printf("[Machine: %v] Execute bootstrap job log: %v\n", m.Name, line)
+	}); err != nil {
+		return fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+	}
+
+	// Parse the pipeline for jobs
+	log.Println("Parsing pipelines for jobs")
+
+	// Get content of bytes in the pipeline files
+	var pipelineData [][]byte
+	for _, f := range pipelineFiles {
+		script = fmt.Sprintf("cat %s/%s/%s", DefaultCloneDir, pipeline.PipelineDir, f)
+		ctx = context.Background()
+
+		var data []byte
+		if err := m.executor.Execute(executor.ExecutorOpts{
+			Ctx:           ctx,
+			Script:        pipeline.Script(script),
+			EnvironmentId: container.ID,
+		}, func(line string) {
+			data = append(data, []byte(line)...)
+			data = append(data, '\n')
+		}); err != nil {
+			return fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+		}
+
+		pipelineData = append(pipelineData, data)
+	}
+
+	// Parse pipeline files to pipeline objects
+	log.Printf("Adding %v vals to wait group", len(pipelineData))
+
+	var wg sync.WaitGroup
+	jobCh := make(chan pipeline.Job)
+
+	for _, d := range pipelineData {
+		wg.Add(1)
+		go func(data []byte, jobCh chan<- pipeline.Job) {
+			defer wg.Done()
+
+			p, err := pipeline.ParsePipeline(data)
+			if err != nil {
+				fmt.Printf("error parsing pipeline: %v\n", err)
+				return
+			}
+
+			log.Printf("Parsed pipeline successfully: %+v\n", p.Name)
+			for _, j := range p.Jobs {
+				jobCh <- j
+			}
+
+			log.Printf("End of method")
+		}(d, jobCh)
+	}
+
+	// Wait for waitgroup to finish to close pipelineCh
+	go func() {
+		wg.Wait()
+		close(jobCh)
+	}()
+
+	for j := range jobCh {
+		log.Printf("Recieved job from channel: %+v\n", j)
+		if err := m.mciClient.AddJob(ctx, &j); err != nil {
+			log.Printf("Error sending add job request to server %v\n", err)
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -199,23 +342,10 @@ func (m *Machine) runPipelineJob(j *pipeline.Job) error {
 		Env:        j.Variables,
 	}
 
-	container, err := NewDockerContainer(m.dockerClient, options)
+	container, err := m.createAndStartDockerContainer(options)
 	if err != nil {
 		return err
 	}
-
-	container.Start()
-	defer func() {
-		if err := container.Stop(); err != nil {
-			// Log the cleanup error, but don't return it,
-			// as the original error from the steps is more important.
-			fmt.Fprintf(os.Stderr, "error stopping container on cleanup: %v\n", err)
-		}
-
-		if err := container.Remove(); err != nil {
-			fmt.Fprintf(os.Stderr, "error removing container on cleanup: %v\n", err)
-		}
-	}()
 
 	log.Println("Starting to run all steps")
 	if err := m.runAllSteps(container.ctx, j, container.ID); err != nil {
@@ -223,6 +353,31 @@ func (m *Machine) runPipelineJob(j *pipeline.Job) error {
 	}
 
 	return nil
+}
+
+func (m *Machine) createAndStartDockerContainer(opts DockerContainerOptions) (*DockerContainer, error) {
+	container, err := NewDockerContainer(m.dockerClient, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	err = container.Start()
+	if err != nil {
+		return nil, err
+	}
+	return container, nil
+}
+
+func (m *Machine) stopAndRemoveDockerContainer(container *DockerContainer) {
+	if err := container.Stop(); err != nil {
+		// Log the cleanup error, but don't return it,
+		// as the original error from the steps is more important.
+		fmt.Fprintf(os.Stderr, "error stopping container on cleanup: %v\n", err)
+	}
+
+	if err := container.Remove(); err != nil {
+		fmt.Fprintf(os.Stderr, "error removing container on cleanup: %v\n", err)
+	}
 }
 
 // Runs all the steps for a job in the specified container
@@ -261,7 +416,7 @@ func (m *Machine) runStep(ctx context.Context, s pipeline.Step, vars common.Vari
 		Vars:          vars,
 		EnvironmentId: containerID,
 	}, func(line string) {
-		fmt.Printf("[Machine: %v] Execute job log: %v\n", m.Name, line)
+		fmt.Printf("[Machine: %v] Execute pipeline job log: %v\n", m.Name, line)
 		m.mciClient.StreamLogs(ctx, jobRunId, line)
 	}); err != nil {
 		return false, fmt.Errorf("failed to run step [%v]: %v", s.Name, err)

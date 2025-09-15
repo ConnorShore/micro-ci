@@ -8,7 +8,7 @@ import (
 	"slices"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
-	"github.com/ConnorShore/micro-ci/internal/pipeline"
+	"github.com/ConnorShore/micro-ci/internal/mappings"
 	"github.com/ConnorShore/micro-ci/internal/server/scheduler"
 	"github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
 	"google.golang.org/grpc"
@@ -90,8 +90,18 @@ func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequ
 	s.jobMachineMap[j.GetRunId()] = req.MachineId
 	s.jobStatus[j.GetRunId()] = common.StatusPending
 
-	job, err := s.convertJobToProtoJob(j)
+	job, err := mappings.ConvertJobToProtoJob(j)
 	return &micro_ci.FetchJobResponse{Job: job}, err
+}
+
+func (s *MicroCIServer) AddJob(ctx context.Context, req *micro_ci.Job) (*micro_ci.AddJobResponse, error) {
+	job, err := mappings.ConvertProtoJobToPipelineJob(req)
+	if err != nil {
+		return &micro_ci.AddJobResponse{Success: false}, err
+	}
+
+	s.jobQ.Enqueue(job)
+	return &micro_ci.AddJobResponse{Success: true}, nil
 }
 
 // Update the status of a job
@@ -115,63 +125,4 @@ func (s *MicroCIServer) StreamLogs(ctx context.Context, req *micro_ci.StreamLogs
 	return &micro_ci.StreamLogsResponse{
 		Success: true,
 	}, nil
-}
-
-func (s *MicroCIServer) convertJobToProtoJob(j common.Job) (*micro_ci.Job, error) {
-	switch t := j.(type) {
-	case *pipeline.Job:
-		return s.convertPipelineJobToProtoJob(j.(*pipeline.Job)), nil
-	case *common.BootstrapJob:
-		return s.convertBootstrapJobToProtoJob(j.(*common.BootstrapJob)), nil
-	default:
-		return nil, fmt.Errorf("failed to convert job of type [%+v] to proto job", t)
-	}
-}
-
-func (s *MicroCIServer) convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
-	fmt.Printf("Converting pipeline job [%+v] to proto job\n", *j)
-	var steps []*micro_ci.Step
-	for _, s := range j.Steps {
-		ps := &micro_ci.Step{
-			Name:            s.Name,
-			Condition:       s.Condition,
-			Variables:       s.Variables,
-			ContinueOnError: s.ContinueOnError,
-			Script:          string(s.Script),
-		}
-
-		steps = append(steps, ps)
-	}
-
-	var pipelineJob = &micro_ci.Job_PipelineJob{
-		Condition: j.Condition,
-		Variables: j.Variables,
-		Image:     j.Image,
-		Steps:     steps,
-	}
-
-	return &micro_ci.Job{
-		RunId: j.GetRunId(),
-		Name:  j.Name,
-		JobType: &micro_ci.Job_PipelineJob_{
-			PipelineJob: pipelineJob,
-		},
-	}
-}
-
-func (s *MicroCIServer) convertBootstrapJobToProtoJob(j *common.BootstrapJob) *micro_ci.Job {
-	fmt.Printf("Converting bootstrap job [%+v] to proto job\n", *j)
-	var bootstrapJob = &micro_ci.Job_BootstrapJob{
-		RepoUrl:   j.RepoURL,
-		CommitSha: j.CommitSha,
-		Branch:    j.Branch,
-	}
-
-	return &micro_ci.Job{
-		RunId: j.GetRunId(),
-		Name:  j.Name,
-		JobType: &micro_ci.Job_BootstrapJob_{
-			BootstrapJob: bootstrapJob,
-		},
-	}
 }

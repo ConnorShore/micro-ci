@@ -1,7 +1,9 @@
 package pipeline
 
-import (
-	"github.com/ConnorShore/micro-ci/internal/common"
+import "github.com/ConnorShore/micro-ci/internal/common"
+
+const (
+	PipelineDir = ".micro-ci"
 )
 
 type Script string
@@ -25,16 +27,16 @@ type Job struct {
 	// DependsOn
 }
 
+func (j *Job) GetRunId() string {
+	return j.RunId
+}
+
 func (j *Job) GetName() string {
 	return j.Name
 }
 
 func (j *Job) GetType() common.JobType {
 	return common.TypePipeline
-}
-
-func (j *Job) GetRunId() string {
-	return j.RunId
 }
 
 type Pipeline struct {

@@ -460,6 +460,50 @@ func (x *FetchJobResponse) GetJob() *Job {
 	return nil
 }
 
+type AddJobResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddJobResponse) Reset() {
+	*x = AddJobResponse{}
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddJobResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddJobResponse) ProtoMessage() {}
+
+func (x *AddJobResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddJobResponse.ProtoReflect.Descriptor instead.
+func (*AddJobResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *AddJobResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type UpdateJobStatusRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	JobRunId      string                 `protobuf:"bytes,1,opt,name=job_run_id,json=jobRunId,proto3" json:"job_run_id,omitempty"`
@@ -470,7 +514,7 @@ type UpdateJobStatusRequest struct {
 
 func (x *UpdateJobStatusRequest) Reset() {
 	*x = UpdateJobStatusRequest{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[8]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -482,7 +526,7 @@ func (x *UpdateJobStatusRequest) String() string {
 func (*UpdateJobStatusRequest) ProtoMessage() {}
 
 func (x *UpdateJobStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[8]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -495,7 +539,7 @@ func (x *UpdateJobStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateJobStatusRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{8}
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateJobStatusRequest) GetJobRunId() string {
@@ -521,7 +565,7 @@ type UpdateJobStatusResponse struct {
 
 func (x *UpdateJobStatusResponse) Reset() {
 	*x = UpdateJobStatusResponse{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[9]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -533,7 +577,7 @@ func (x *UpdateJobStatusResponse) String() string {
 func (*UpdateJobStatusResponse) ProtoMessage() {}
 
 func (x *UpdateJobStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[9]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,7 +590,7 @@ func (x *UpdateJobStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateJobStatusResponse.ProtoReflect.Descriptor instead.
 func (*UpdateJobStatusResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{9}
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateJobStatusResponse) GetSuccess() bool {
@@ -566,7 +610,7 @@ type StreamLogsRequest struct {
 
 func (x *StreamLogsRequest) Reset() {
 	*x = StreamLogsRequest{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[10]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -578,7 +622,7 @@ func (x *StreamLogsRequest) String() string {
 func (*StreamLogsRequest) ProtoMessage() {}
 
 func (x *StreamLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[10]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -591,7 +635,7 @@ func (x *StreamLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamLogsRequest.ProtoReflect.Descriptor instead.
 func (*StreamLogsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{10}
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *StreamLogsRequest) GetJobRunId() string {
@@ -617,7 +661,7 @@ type StreamLogsResponse struct {
 
 func (x *StreamLogsResponse) Reset() {
 	*x = StreamLogsResponse{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[11]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -629,7 +673,7 @@ func (x *StreamLogsResponse) String() string {
 func (*StreamLogsResponse) ProtoMessage() {}
 
 func (x *StreamLogsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[11]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -642,7 +686,7 @@ func (x *StreamLogsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StreamLogsResponse.ProtoReflect.Descriptor instead.
 func (*StreamLogsResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{11}
+	return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *StreamLogsResponse) GetSuccess() bool {
@@ -664,7 +708,7 @@ type Job_PipelineJob struct {
 
 func (x *Job_PipelineJob) Reset() {
 	*x = Job_PipelineJob{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[13]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -676,7 +720,7 @@ func (x *Job_PipelineJob) String() string {
 func (*Job_PipelineJob) ProtoMessage() {}
 
 func (x *Job_PipelineJob) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[13]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -731,7 +775,7 @@ type Job_BootstrapJob struct {
 
 func (x *Job_BootstrapJob) Reset() {
 	*x = Job_BootstrapJob{}
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -743,7 +787,7 @@ func (x *Job_BootstrapJob) String() string {
 func (*Job_BootstrapJob) ProtoMessage() {}
 
 func (x *Job_BootstrapJob) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[14]
+	mi := &file_pkg_rpc_micro_ci_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -828,7 +872,9 @@ const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
 	"\n" +
 	"machine_id\x18\x01 \x01(\tR\tmachineId\"3\n" +
 	"\x10FetchJobResponse\x12\x1f\n" +
-	"\x03job\x18\x01 \x01(\v2\r.micro_ci.JobR\x03job\"N\n" +
+	"\x03job\x18\x01 \x01(\v2\r.micro_ci.JobR\x03job\"*\n" +
+	"\x0eAddJobResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"N\n" +
 	"\x16UpdateJobStatusRequest\x12\x1c\n" +
 	"\n" +
 	"job_run_id\x18\x01 \x01(\tR\bjobRunId\x12\x16\n" +
@@ -840,12 +886,13 @@ const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
 	"job_run_id\x18\x01 \x01(\tR\bjobRunId\x12\x19\n" +
 	"\blog_data\x18\x02 \x01(\tR\alogData\".\n" +
 	"\x12StreamLogsResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess2\xf9\x02\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess2\xac\x03\n" +
 	"\aMicroCI\x12A\n" +
 	"\bRegister\x12\x19.micro_ci.RegisterRequest\x1a\x1a.micro_ci.RegisterResponse\x12G\n" +
 	"\n" +
 	"Unregister\x12\x1b.micro_ci.UnregisterRequest\x1a\x1c.micro_ci.UnregisterResponse\x12A\n" +
-	"\bFetchJob\x12\x19.micro_ci.FetchJobRequest\x1a\x1a.micro_ci.FetchJobResponse\x12V\n" +
+	"\bFetchJob\x12\x19.micro_ci.FetchJobRequest\x1a\x1a.micro_ci.FetchJobResponse\x121\n" +
+	"\x06AddJob\x12\r.micro_ci.Job\x1a\x18.micro_ci.AddJobResponse\x12V\n" +
 	"\x0fUpdateJobStatus\x12 .micro_ci.UpdateJobStatusRequest\x1a!.micro_ci.UpdateJobStatusResponse\x12G\n" +
 	"\n" +
 	"StreamLogs\x12\x1b.micro_ci.StreamLogsRequest\x1a\x1c.micro_ci.StreamLogsResponseB\x12Z\x10pkg/rpc/micro_cib\x06proto3"
@@ -862,7 +909,7 @@ func file_pkg_rpc_micro_ci_proto_rawDescGZIP() []byte {
 	return file_pkg_rpc_micro_ci_proto_rawDescData
 }
 
-var file_pkg_rpc_micro_ci_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_pkg_rpc_micro_ci_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_pkg_rpc_micro_ci_proto_goTypes = []any{
 	(*Step)(nil),                    // 0: micro_ci.Step
 	(*Job)(nil),                     // 1: micro_ci.Job
@@ -872,34 +919,37 @@ var file_pkg_rpc_micro_ci_proto_goTypes = []any{
 	(*UnregisterResponse)(nil),      // 5: micro_ci.UnregisterResponse
 	(*FetchJobRequest)(nil),         // 6: micro_ci.FetchJobRequest
 	(*FetchJobResponse)(nil),        // 7: micro_ci.FetchJobResponse
-	(*UpdateJobStatusRequest)(nil),  // 8: micro_ci.UpdateJobStatusRequest
-	(*UpdateJobStatusResponse)(nil), // 9: micro_ci.UpdateJobStatusResponse
-	(*StreamLogsRequest)(nil),       // 10: micro_ci.StreamLogsRequest
-	(*StreamLogsResponse)(nil),      // 11: micro_ci.StreamLogsResponse
-	nil,                             // 12: micro_ci.Step.VariablesEntry
-	(*Job_PipelineJob)(nil),         // 13: micro_ci.Job.PipelineJob
-	(*Job_BootstrapJob)(nil),        // 14: micro_ci.Job.BootstrapJob
-	nil,                             // 15: micro_ci.Job.PipelineJob.VariablesEntry
+	(*AddJobResponse)(nil),          // 8: micro_ci.AddJobResponse
+	(*UpdateJobStatusRequest)(nil),  // 9: micro_ci.UpdateJobStatusRequest
+	(*UpdateJobStatusResponse)(nil), // 10: micro_ci.UpdateJobStatusResponse
+	(*StreamLogsRequest)(nil),       // 11: micro_ci.StreamLogsRequest
+	(*StreamLogsResponse)(nil),      // 12: micro_ci.StreamLogsResponse
+	nil,                             // 13: micro_ci.Step.VariablesEntry
+	(*Job_PipelineJob)(nil),         // 14: micro_ci.Job.PipelineJob
+	(*Job_BootstrapJob)(nil),        // 15: micro_ci.Job.BootstrapJob
+	nil,                             // 16: micro_ci.Job.PipelineJob.VariablesEntry
 }
 var file_pkg_rpc_micro_ci_proto_depIdxs = []int32{
-	12, // 0: micro_ci.Step.variables:type_name -> micro_ci.Step.VariablesEntry
-	13, // 1: micro_ci.Job.pipeline_job:type_name -> micro_ci.Job.PipelineJob
-	14, // 2: micro_ci.Job.bootstrap_job:type_name -> micro_ci.Job.BootstrapJob
+	13, // 0: micro_ci.Step.variables:type_name -> micro_ci.Step.VariablesEntry
+	14, // 1: micro_ci.Job.pipeline_job:type_name -> micro_ci.Job.PipelineJob
+	15, // 2: micro_ci.Job.bootstrap_job:type_name -> micro_ci.Job.BootstrapJob
 	1,  // 3: micro_ci.FetchJobResponse.job:type_name -> micro_ci.Job
-	15, // 4: micro_ci.Job.PipelineJob.variables:type_name -> micro_ci.Job.PipelineJob.VariablesEntry
+	16, // 4: micro_ci.Job.PipelineJob.variables:type_name -> micro_ci.Job.PipelineJob.VariablesEntry
 	0,  // 5: micro_ci.Job.PipelineJob.steps:type_name -> micro_ci.Step
 	2,  // 6: micro_ci.MicroCI.Register:input_type -> micro_ci.RegisterRequest
 	4,  // 7: micro_ci.MicroCI.Unregister:input_type -> micro_ci.UnregisterRequest
 	6,  // 8: micro_ci.MicroCI.FetchJob:input_type -> micro_ci.FetchJobRequest
-	8,  // 9: micro_ci.MicroCI.UpdateJobStatus:input_type -> micro_ci.UpdateJobStatusRequest
-	10, // 10: micro_ci.MicroCI.StreamLogs:input_type -> micro_ci.StreamLogsRequest
-	3,  // 11: micro_ci.MicroCI.Register:output_type -> micro_ci.RegisterResponse
-	5,  // 12: micro_ci.MicroCI.Unregister:output_type -> micro_ci.UnregisterResponse
-	7,  // 13: micro_ci.MicroCI.FetchJob:output_type -> micro_ci.FetchJobResponse
-	9,  // 14: micro_ci.MicroCI.UpdateJobStatus:output_type -> micro_ci.UpdateJobStatusResponse
-	11, // 15: micro_ci.MicroCI.StreamLogs:output_type -> micro_ci.StreamLogsResponse
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
+	1,  // 9: micro_ci.MicroCI.AddJob:input_type -> micro_ci.Job
+	9,  // 10: micro_ci.MicroCI.UpdateJobStatus:input_type -> micro_ci.UpdateJobStatusRequest
+	11, // 11: micro_ci.MicroCI.StreamLogs:input_type -> micro_ci.StreamLogsRequest
+	3,  // 12: micro_ci.MicroCI.Register:output_type -> micro_ci.RegisterResponse
+	5,  // 13: micro_ci.MicroCI.Unregister:output_type -> micro_ci.UnregisterResponse
+	7,  // 14: micro_ci.MicroCI.FetchJob:output_type -> micro_ci.FetchJobResponse
+	8,  // 15: micro_ci.MicroCI.AddJob:output_type -> micro_ci.AddJobResponse
+	10, // 16: micro_ci.MicroCI.UpdateJobStatus:output_type -> micro_ci.UpdateJobStatusResponse
+	12, // 17: micro_ci.MicroCI.StreamLogs:output_type -> micro_ci.StreamLogsResponse
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -920,7 +970,7 @@ func file_pkg_rpc_micro_ci_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_rpc_micro_ci_proto_rawDesc), len(file_pkg_rpc_micro_ci_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

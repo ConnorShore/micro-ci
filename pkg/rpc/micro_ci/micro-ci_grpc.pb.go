@@ -22,6 +22,7 @@ const (
 	MicroCI_Register_FullMethodName        = "/micro_ci.MicroCI/Register"
 	MicroCI_Unregister_FullMethodName      = "/micro_ci.MicroCI/Unregister"
 	MicroCI_FetchJob_FullMethodName        = "/micro_ci.MicroCI/FetchJob"
+	MicroCI_AddJob_FullMethodName          = "/micro_ci.MicroCI/AddJob"
 	MicroCI_UpdateJobStatus_FullMethodName = "/micro_ci.MicroCI/UpdateJobStatus"
 	MicroCI_StreamLogs_FullMethodName      = "/micro_ci.MicroCI/StreamLogs"
 )
@@ -38,6 +39,7 @@ type MicroCIClient interface {
 	Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error)
 	// Fetch a job for the registered runner to execute
 	FetchJob(ctx context.Context, in *FetchJobRequest, opts ...grpc.CallOption) (*FetchJobResponse, error)
+	AddJob(ctx context.Context, in *Job, opts ...grpc.CallOption) (*AddJobResponse, error)
 	// Update the status of a job
 	UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error)
 	// Stream logs from the runner to the CI server
@@ -82,6 +84,16 @@ func (c *microCIClient) FetchJob(ctx context.Context, in *FetchJobRequest, opts 
 	return out, nil
 }
 
+func (c *microCIClient) AddJob(ctx context.Context, in *Job, opts ...grpc.CallOption) (*AddJobResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddJobResponse)
+	err := c.cc.Invoke(ctx, MicroCI_AddJob_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *microCIClient) UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateJobStatusResponse)
@@ -114,6 +126,7 @@ type MicroCIServer interface {
 	Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error)
 	// Fetch a job for the registered runner to execute
 	FetchJob(context.Context, *FetchJobRequest) (*FetchJobResponse, error)
+	AddJob(context.Context, *Job) (*AddJobResponse, error)
 	// Update the status of a job
 	UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error)
 	// Stream logs from the runner to the CI server
@@ -136,6 +149,9 @@ func (UnimplementedMicroCIServer) Unregister(context.Context, *UnregisterRequest
 }
 func (UnimplementedMicroCIServer) FetchJob(context.Context, *FetchJobRequest) (*FetchJobResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FetchJob not implemented")
+}
+func (UnimplementedMicroCIServer) AddJob(context.Context, *Job) (*AddJobResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddJob not implemented")
 }
 func (UnimplementedMicroCIServer) UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateJobStatus not implemented")
@@ -218,6 +234,24 @@ func _MicroCI_FetchJob_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MicroCI_AddJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Job)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MicroCIServer).AddJob(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MicroCI_AddJob_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MicroCIServer).AddJob(ctx, req.(*Job))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MicroCI_UpdateJobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateJobStatusRequest)
 	if err := dec(in); err != nil {
@@ -272,6 +306,10 @@ var MicroCI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FetchJob",
 			Handler:    _MicroCI_FetchJob_Handler,
+		},
+		{
+			MethodName: "AddJob",
+			Handler:    _MicroCI_AddJob_Handler,
 		},
 		{
 			MethodName: "UpdateJobStatus",
