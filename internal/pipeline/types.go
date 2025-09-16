@@ -1,10 +1,9 @@
 package pipeline
 
-import (
-	"os"
+import "github.com/ConnorShore/micro-ci/internal/common"
 
-	"github.com/ConnorShore/micro-ci/internal/common"
-	"gopkg.in/yaml.v3"
+const (
+	PipelineDir = ".micro-ci"
 )
 
 type Script string
@@ -19,31 +18,29 @@ type Step struct {
 
 // TODO: Add depends on for jobs (job2 depends on job1, etc)
 type Job struct {
+	RunId     string             `yaml:"-"`
 	Name      string             `yaml:"job"`
 	Condition string             `yaml:"condition"`
 	Variables common.VariableMap `yaml:"variables"`
 	Image     string             `yaml:"image"`
 	Steps     []Step             `yaml:"steps"`
+	// DependsOn
+}
+
+func (j *Job) GetRunId() string {
+	return j.RunId
+}
+
+func (j *Job) GetName() string {
+	return j.Name
+}
+
+func (j *Job) GetType() common.JobType {
+	return common.TypePipeline
 }
 
 type Pipeline struct {
 	Name      string             `yaml:"name"`
 	Variables common.VariableMap `yaml:"variables"`
 	Jobs      []Job
-}
-
-// Given a filepath, parse the file into a Pipeline object
-func ParsePipeline(file string) (*Pipeline, error) {
-	data, err := os.ReadFile(file)
-	if err != nil {
-		return nil, err
-	}
-
-	pipeline := &Pipeline{}
-	err = yaml.Unmarshal(data, pipeline)
-	if err != nil {
-		return nil, err
-	}
-
-	return pipeline, nil
 }

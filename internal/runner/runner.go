@@ -3,112 +3,79 @@ package runner
 import (
 	"context"
 	"fmt"
-	"maps"
 	"os"
-	"strings"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
+	mciClient "github.com/ConnorShore/micro-ci/internal/runner/client"
+	"github.com/ConnorShore/micro-ci/internal/runner/executor"
+	dockerClient "github.com/docker/docker/client"
+)
+
+const (
+	DefaultCloneDir = "working-repo"
+	DefaultImage    = "golang:1.21-alpine"
 )
 
 type Runner interface {
-	Run(p pipeline.Pipeline) error
-	RunJob(j pipeline.Job, variables common.VariableMap) (bool, error)
-	RunStep(ctx context.Context, s pipeline.Step, variables common.VariableMap) (bool, error)
+	Run(j common.Job) error
 }
 
 type BaseRunner struct {
-	WorkingDirectory string
+	ID           string
+	WorkingDir   string
+	mciClient    mciClient.MicroCIClient
+	executor     executor.Executor
+	dockerClient *dockerClient.Client
 }
 
-func (br *BaseRunner) runAllJobs(r Runner, p pipeline.Pipeline) (bool, error) {
-	pipelineVars := mergeVariables(variablesSliceToMap(os.Environ()), p.Variables)
-
-	for _, j := range p.Jobs {
-		fmt.Printf("\n\n======= Running Job [%v] ======\n\n", j.Name)
-		run, err := canRun(j.Condition)
-		if err != nil {
-			fmt.Printf("Job [%v] condition failed to parse. Skipping job.\n", j.Name)
-			fmt.Println(strings.Repeat("=", 60))
-			continue
-		}
-
-		if !run {
-			fmt.Printf("Skipping job [%v].\n", j.Name)
-			fmt.Println(strings.Repeat("=", 60))
-			continue
-		}
-
-		_, err = r.RunJob(j, pipelineVars)
-		if err != nil {
-			return false, fmt.Errorf("job [%v] failed to complete: %v", j.Name, err)
-		}
-		fmt.Printf("\n%v\n", strings.Repeat("=", 60))
+// Creates and starts a docker container for a run
+func (r *BaseRunner) createAndStartDockerContainer(opts DockerContainerOptions) (*DockerContainer, error) {
+	container, err := NewDockerContainer(r.dockerClient, opts)
+	if err != nil {
+		return nil, err
 	}
 
-	return true, nil
+	err = container.Start()
+	if err != nil {
+		return nil, err
+	}
+	return container, nil
 }
 
-func (br *BaseRunner) runAllSteps(ctx context.Context, r Runner, j pipeline.Job, variables common.VariableMap) error {
-	// Add job variables
-	jobVars := mergeVariables(variables, j.Variables)
+// Stops and removes the specified container
+func (r *BaseRunner) stopAndRemoveDockerContainer(container *DockerContainer) {
+	if err := container.Stop(); err != nil {
+		// Log the cleanup error, but don't return it,
+		// as the original error from the steps is more important.
+		fmt.Fprintf(os.Stderr, "error stopping container on cleanup: %v\n", err)
+	}
 
-	for _, s := range j.Steps {
-		fmt.Printf("\n---- Running Step [%v] ----\n", s.Name)
-		run, err := canRun(s.Condition)
-		if err != nil {
-			fmt.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
-			fmt.Println(strings.Repeat("-", 60))
-			continue
-		}
+	if err := container.Remove(); err != nil {
+		fmt.Fprintf(os.Stderr, "error removing container on cleanup: %v\n", err)
+	}
+}
 
-		if !run {
-			fmt.Printf("Skipping step [%v].\n", s.Name)
-			fmt.Println(strings.Repeat("-", 60))
-			continue
-		}
-
-		_, err = r.RunStep(ctx, s, jobVars)
-		if err != nil && !s.ContinueOnError {
-			fmt.Printf("Exiting due to error on step [%v+]\n", s)
-			return err
-		}
-		fmt.Println(strings.Repeat("-", 60))
+// Executes a command and stream response out to client
+func (r *BaseRunner) executeCommand(script, containerId, runId string) error {
+	ctx := context.Background()
+	if err := r.executeCommandWithOut(ctx, script, containerId, func(line string) {
+		fmt.Printf("[Runner: %v] Execute job log: %v\n", r.ID, line)
+		r.mciClient.StreamLogs(ctx, runId, line)
+	}); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-// Evaluates Job or Step's condition to determine if step should be ran
-func canRun(condition string) (bool, error) {
-	// TODO: Need to create an expression evaluator and move this there
-	return true, nil
-}
+// Execute command andn provide custom handling for std out
+func (r *BaseRunner) executeCommandWithOut(ctx context.Context, script, containerId string, onStdOut func(line string)) error {
+	err := r.executor.Execute(executor.ExecutorOpts{
+		Ctx:           ctx,
+		Script:        pipeline.Script(script),
+		EnvironmentId: containerId,
+	}, onStdOut)
 
-// Converts a VariableMap to a VariableSlice
-func variablesMapToSlice(variables common.VariableMap) common.VariableSlice {
-	var ret common.VariableSlice = make(common.VariableSlice, 0)
-	for key, val := range variables {
-		ret = append(ret, string(key+"="+val))
-	}
-	return ret
-}
-
-// Converts a VariableSlice to a VariableMap
-func variablesSliceToMap(variables common.VariableSlice) common.VariableMap {
-	var ret common.VariableMap = make(common.VariableMap)
-	for _, val := range variables {
-		keyValSplit := strings.Split(val, "=")
-		ret[strings.TrimSpace(keyValSplit[0])] = strings.TrimSpace(keyValSplit[1])
-	}
-
-	return ret
-}
-
-func mergeVariables(vars ...common.VariableMap) common.VariableMap {
-	var ret common.VariableMap = make(common.VariableMap)
-	for _, v := range vars {
-		maps.Copy(ret, v)
-	}
-	return ret
+	return err
 }
