@@ -28,6 +28,7 @@ func NewWebhookServer(addr string, jobQueue scheduler.JobQueue) *WebhookServer {
 	}
 }
 
+// Starts the webhooks erver
 func (s *WebhookServer) Start() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -49,22 +50,22 @@ func (s *WebhookServer) Start() error {
 	return s.server.ListenAndServe()
 }
 
+// Shutdown the webhook server
 func (s *WebhookServer) Shutdown() error {
 	return s.server.Shutdown(context.Background())
 }
 
+// Handler method for webhooks that
+// 1. handles the webhook request
+// 2. parses pipeline with appropriate webhook handler
+// 3. adds the parsed jobs to the jobQ
 func (s *WebhookServer) handleWebhook(w http.ResponseWriter, r *http.Request, path string) {
 	log.Printf("Handling webhook at path: %s\n", path)
-	// handle the webhook request
-	// parses pipeline with appropriate webhook handler
-	// and adds the parsed jobs to the jobQ
 	if r.Method != http.MethodPost {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
 
-	log.Println("valid post method")
-	log.Printf("handlers: %+v", s.handlers)
 	handler, ok := s.handlers[path]
 	if !ok {
 		http.NotFound(w, r)
@@ -83,6 +84,7 @@ func (s *WebhookServer) handleWebhook(w http.ResponseWriter, r *http.Request, pa
 	s.JobQueue.Enqueue(bootstrapJob)
 
 	log.Printf("Successfully handled webhook at path %s\n", path)
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("successfully handled webhook and jobs enqueued"))
 }

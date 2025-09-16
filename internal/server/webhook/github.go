@@ -20,10 +20,6 @@ func NewGithubWebhookHandler() *GithubWebhookHandler {
 }
 
 func (gh *GithubWebhookHandler) Parse(r *http.Request) (*common.BootstrapJob, error) {
-	// TODO: See if the incoming request and headers match valid event handler
-	// if so call ParseEvent() for that handlers
-	// otherwise return nil
-
 	eventType := WebhookEventType(r.Header.Get(GitHubHeader))
 	if eventType == "" {
 		return nil, fmt.Errorf("event type header X-GITHUB-EVENT not present")
@@ -35,14 +31,6 @@ func (gh *GithubWebhookHandler) Parse(r *http.Request) (*common.BootstrapJob, er
 	}
 
 	return handler.ParseEvent(r.Body)
-	// jobs := []*pipeline.Job{}
-	// for _, j := range p.Jobs {
-	// 	j.RunId = uuid.NewString()
-	// 	j.Variables = common.MergeVariables(p.Variables, j.Variables)
-	// 	jobs = append(jobs, &j)
-	// }
-
-	// return jobs, nil
 }
 
 func (gh *GithubWebhookHandler) AddEventHandler(t WebhookEventType, h WebhookEventHandler) {

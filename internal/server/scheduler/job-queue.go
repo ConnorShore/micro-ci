@@ -21,8 +21,6 @@ func NewInMemoryJobQueue(capacity int) *InMemJobQueue {
 }
 
 func (q *InMemJobQueue) Enqueue(j common.Job) {
-	// TODO: Maybe send some notification when job has been added to queue
-	// so grpc server can update the job state
 	q.jobCh <- j
 }
 

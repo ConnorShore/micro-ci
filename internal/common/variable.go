@@ -30,6 +30,7 @@ func VariablesSliceToMap(variables VariableSlice) VariableMap {
 	return ret
 }
 
+// Merges variable maps into single variable map
 func MergeVariables(vars ...VariableMap) VariableMap {
 	var ret VariableMap = make(VariableMap)
 	for _, v := range vars {

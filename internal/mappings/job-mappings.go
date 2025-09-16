@@ -8,6 +8,7 @@ import (
 	"github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
 )
 
+// Generic method to convert a job into a proto (rpc) job
 func ConvertJobToProtoJob(j common.Job) (*micro_ci.Job, error) {
 	switch j.GetType() {
 	case common.TypePipeline:
@@ -19,7 +20,20 @@ func ConvertJobToProtoJob(j common.Job) (*micro_ci.Job, error) {
 	}
 }
 
-func ConvertProtoJobToBootstrapJob(j *micro_ci.Job) (*common.BootstrapJob, error) {
+// Generic method to convert a proto (rpc) job into a job
+func ConvertProtoJobToJob(j *micro_ci.Job) (common.Job, error) {
+	switch t := j.JobType.(type) {
+	case *micro_ci.Job_PipelineJob_:
+		return convertProtoJobToPipelineJob(j)
+	case *micro_ci.Job_BootstrapJob_:
+		return convertProtoJobToBootstrapJob(j)
+	default:
+		return nil, fmt.Errorf("cannot add job of unknown type: %v", t)
+	}
+}
+
+// Converts a proto (rpc) job to a bootstrap job
+func convertProtoJobToBootstrapJob(j *micro_ci.Job) (*common.BootstrapJob, error) {
 	if t, ok := j.JobType.(*micro_ci.Job_BootstrapJob_); !ok {
 		return nil, fmt.Errorf("cannot convert proto job of type [%+v] to bootstrap job", t)
 	}
@@ -35,7 +49,8 @@ func ConvertProtoJobToBootstrapJob(j *micro_ci.Job) (*common.BootstrapJob, error
 	}, nil
 }
 
-func ConvertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
+// converts a proto (rpc) job to a pipeline job
+func convertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
 	if t, ok := j.JobType.(*micro_ci.Job_PipelineJob_); !ok {
 		return nil, fmt.Errorf("cannot convert proto job of type [%+v] to pipeline job", t)
 	}
@@ -63,6 +78,7 @@ func ConvertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
 	}, nil
 }
 
+// Converts a pipeline job to a proto (rpc) job
 func convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
 	fmt.Printf("Converting pipeline job [%+v] to proto job\n", *j)
 	var steps []*micro_ci.Step
@@ -94,6 +110,7 @@ func convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
 	}
 }
 
+// Converts a bootstrap job to a proto (rpc) job
 func convertBootstrapJobToProtoJob(j *common.BootstrapJob) *micro_ci.Job {
 	fmt.Printf("Converting bootstrap job [%+v] to proto job\n", *j)
 	var bootstrapJob = &micro_ci.Job_BootstrapJob{

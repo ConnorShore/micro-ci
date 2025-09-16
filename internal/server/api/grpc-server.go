@@ -94,8 +94,9 @@ func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequ
 	return &micro_ci.FetchJobResponse{Job: job}, err
 }
 
+// Adds a pipeline job to the queue
 func (s *MicroCIServer) AddJob(ctx context.Context, req *micro_ci.Job) (*micro_ci.AddJobResponse, error) {
-	job, err := mappings.ConvertProtoJobToPipelineJob(req)
+	job, err := mappings.ConvertProtoJobToJob(req)
 	if err != nil {
 		return &micro_ci.AddJobResponse{Success: false}, err
 	}

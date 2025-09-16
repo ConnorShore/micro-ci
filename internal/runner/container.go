@@ -50,22 +50,23 @@ func NewDockerContainer(client *client.Client, opts DockerContainerOptions) (*Do
 	return createContainer(ctx, client, opts)
 }
 
+// Starts a container
 func (c *DockerContainer) Start() error {
 	log.Println("Starting Docker container with ID: ", c.ID)
 	if err := c.client.ContainerStart(c.ctx, c.ID, container.StartOptions{}); err != nil {
 		fmt.Printf("After start in ERROR....%s\n", err)
 		return fmt.Errorf("failed to start docker container: %v", err)
 	}
-	fmt.Println("After start....")
 
-	log.Println("Begin waiting for container initialization")
 	if err := c.waitForDockerContainerInitialization(); err != nil {
 		return err
 	}
 
+	log.Println("Successfully started container with ID: ", c.ID)
 	return nil
 }
 
+// Stops the docker container
 func (c *DockerContainer) Stop() error {
 	log.Println("Stopping Docker container with ID: ", c.ID)
 	if err := c.client.ContainerStop(c.ctx, c.ID, container.StopOptions{}); err != nil {
@@ -75,6 +76,7 @@ func (c *DockerContainer) Stop() error {
 	return nil
 }
 
+// Removes the docker container
 func (c *DockerContainer) Remove() error {
 	log.Println("Removing Docker container with ID: ", c.ID)
 	if err := c.client.ContainerRemove(c.ctx, c.ID, container.RemoveOptions{}); err != nil {
@@ -85,6 +87,7 @@ func (c *DockerContainer) Remove() error {
 	return nil
 }
 
+// Waits for container to initialize
 func (c *DockerContainer) waitForDockerContainerInitialization() error {
 	deadlineCtx, cancel := context.WithDeadline(c.ctx, time.Now().Add(30*time.Second))
 	defer cancel()
@@ -113,6 +116,7 @@ func (c *DockerContainer) waitForDockerContainerInitialization() error {
 	}
 }
 
+// Pulls specified image in container
 func pullImage(ctx context.Context, client *client.Client, opts DockerContainerOptions) error {
 	log.Println("Pulling Docker image: ", opts.Image)
 
@@ -140,6 +144,7 @@ func pullImage(ctx context.Context, client *client.Client, opts DockerContainerO
 	return nil
 }
 
+// Helper to create a docker container
 func createContainer(ctx context.Context, client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) {
 	log.Println("Creating Docker container with image: ", opts.Image)
 
@@ -169,6 +174,7 @@ func createContainer(ctx context.Context, client *client.Client, opts DockerCont
 	}, nil
 }
 
+// Creates a container name with random digits at end
 func createContainerName() string {
 	return ContainerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
 }

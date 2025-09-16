@@ -34,21 +34,4 @@ func (h *GithubPushEventHandler) ParseEvent(r io.ReadCloser) (*common.BootstrapJ
 	}
 
 	return bootstrapJob, nil
-
-	// New approach
-	// Create a bootstrap job for the runner
-	// This job will tell the runner to clone the repo and then parse the pipelines
-	// to get all the jobs to run
-	// The runner then returns the jobs back to the server to enqueue them
-
-	// Old thought
-	// Clone the repo (or is there a better way / can just get contents of .micro_ci folder)
-
-	// Parse the .micro_ci folder for pipeline files
-
-	// Figure out which pipelines should run based on this event
-	// i.e does the pipeline contain push trigger for the specified branch
-
-	// Return all jobs to run (may need to track which job is for which pipeline)
-	// in the Job struct
 }

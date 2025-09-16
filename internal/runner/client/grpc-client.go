@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/mappings"
@@ -55,14 +54,7 @@ func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (common.Job
 		return nil, nil
 	}
 
-	switch t := res.Job.JobType.(type) {
-	case *micro_ci.Job_BootstrapJob_:
-		return mappings.ConvertProtoJobToBootstrapJob(res.Job)
-	case *micro_ci.Job_PipelineJob_:
-		return mappings.ConvertProtoJobToPipelineJob(res.Job)
-	default:
-		return nil, fmt.Errorf("unknown type when fetching job [%+v]", t)
-	}
+	return mappings.ConvertProtoJobToJob(res.Job)
 }
 
 func (c *grpcClient) AddJob(ctx context.Context, j *pipeline.Job) error {

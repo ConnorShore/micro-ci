@@ -8,7 +8,6 @@ import (
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/pipeline"
-	"github.com/ConnorShore/micro-ci/internal/runner/executor"
 	"github.com/google/uuid"
 )
 
@@ -79,6 +78,7 @@ func (r *BootstrapRunner) setupContainerForBootstrapJob() (*DockerContainer, err
 func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *common.BootstrapJob) error {
 	// Install git in container
 	log.Printf("Installing git")
+
 	script := "apk update && apk add git"
 	if err := r.executeCommand(script, container.ID, j.RunId); err != nil {
 		return fmt.Errorf("failed to initialize git: %v", err)
@@ -86,6 +86,7 @@ func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *
 
 	// Clone repository for specific sha or branch
 	log.Printf("Cloning repo: %s\n", j.RepoURL)
+
 	script = fmt.Sprintf("git clone %s %s", j.RepoURL, DefaultCloneDir)
 	if err := r.executeCommand(script, container.ID, j.RunId); err != nil {
 		return fmt.Errorf("failed to clone repository: %v", err)
@@ -98,6 +99,7 @@ func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *
 func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *common.BootstrapJob) ([][]byte, error) {
 	// Extract pipeline file data so we can parse it
 	log.Printf("Extracting pipelineFiles")
+
 	var pipelineFiles []string
 	script := fmt.Sprintf("cd %s/%s && ls", DefaultCloneDir, pipeline.PipelineDir)
 	if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) {
@@ -108,17 +110,12 @@ func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *com
 
 	// Get content of bytes in the pipeline files
 	log.Println("Parsing pipeline files")
+
 	var pipelineData [][]byte
 	for _, f := range pipelineFiles {
 		script = fmt.Sprintf("cat %s/%s/%s", DefaultCloneDir, pipeline.PipelineDir, f)
-		ctx := context.Background()
-
 		var data []byte
-		if err := r.executor.Execute(executor.ExecutorOpts{
-			Ctx:           ctx,
-			Script:        pipeline.Script(script),
-			EnvironmentId: container.ID,
-		}, func(line string) {
+		if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) {
 			data = append(data, []byte(line)...)
 			data = append(data, '\n')
 		}); err != nil {
@@ -142,12 +139,14 @@ func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) erro
 		go func(data []byte, jobCh chan<- pipeline.Job) {
 			defer wg.Done()
 
+			// Parse the pipeline
 			p, err := pipeline.ParsePipeline(data)
 			if err != nil {
 				fmt.Printf("error parsing pipeline: %v\n", err)
 				return
 			}
 
+			// Validate the pipeline
 			valid, errors := pipeline.ValidatePipeline(p)
 			if !valid {
 				fmt.Printf("Pipeline validation errors: %+v\n", errors)
@@ -156,6 +155,7 @@ func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) erro
 
 			log.Printf("Parsed and validated pipeline successfully: %+v\n", p.Name)
 
+			// Extract jobs from pipleine
 			for _, j := range p.Jobs {
 				jobCh <- j
 			}
@@ -168,6 +168,7 @@ func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) erro
 		close(jobCh)
 	}()
 
+	// Add all jobs from the job channel to the server queue
 	for j := range jobCh {
 		if err := r.mciClient.AddJob(context.Background(), &j); err != nil {
 			log.Printf("Error sending add job request to server %v\n", err)
