@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/runner"
 	"github.com/ConnorShore/micro-ci/internal/runner/client"
 	"github.com/ConnorShore/micro-ci/internal/runner/executor"
@@ -22,6 +23,14 @@ func main() {
 
 	machine1, err := runner.NewMachine("test-runner-1", client, executor)
 	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Register job runner types with machine
+	if err := machine1.RegisterRunner(common.TypeBootstrap); err != nil {
+		log.Fatal(err)
+	}
+	if err := machine1.RegisterRunner(common.TypePipeline); err != nil {
 		log.Fatal(err)
 	}
 

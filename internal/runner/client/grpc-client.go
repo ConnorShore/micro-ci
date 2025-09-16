@@ -3,7 +3,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/mappings"
@@ -90,8 +89,6 @@ func (c *grpcClient) AddJob(ctx context.Context, j *pipeline.Job) error {
 			},
 		},
 	}
-
-	log.Printf("Adding job to client: %+v\n", *job)
 
 	_, err := c.client.AddJob(ctx, job)
 	return err
