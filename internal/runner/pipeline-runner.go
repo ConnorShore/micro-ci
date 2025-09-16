@@ -49,6 +49,12 @@ func (r *PipelineRunner) Run(j common.Job) error {
 		return err
 	}
 
+	// Remove clone directory after finishing method
+	defer func() {
+		log.Printf("Stopping and removing docker container: %s\n", container.ID)
+		r.stopAndRemoveDockerContainer(container)
+	}()
+
 	log.Println("Starting to run all steps")
 	if err := r.runAllSteps(container.ctx, pJob, container.ID); err != nil {
 		return err
