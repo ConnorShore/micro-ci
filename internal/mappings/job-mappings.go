@@ -60,6 +60,7 @@ func convertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
 	pj := j.GetPipelineJob()
 	for _, s := range pj.Steps {
 		step := pipeline.Step{
+			Name:            s.Name,
 			Condition:       s.Condition,
 			Variables:       s.Variables,
 			ContinueOnError: s.ContinueOnError,
