@@ -33,3 +33,21 @@ runRunner: buildRunner
 buildAndRunServer: buildServer runServer
 
 buildAndRunRunner: buildRunner runRunner
+
+test:
+	@echo "Running tests with verbose output..."
+	go test -v ./...
+	echo "All tests completed."
+
+coverage:
+	@echo "Running tests with coverage report..."
+	go test -v ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+	echo "Coverage report generated at coverage.html."
+	echo "Launching coverage report..."
+	open coverage.html
+
+
+buildAndTest: build test
+
+buildAndTestWithCoverage: build coverage

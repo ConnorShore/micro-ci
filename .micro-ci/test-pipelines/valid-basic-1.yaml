@@ -1,0 +1,9 @@
+name: Simple Valid pipeline 1
+
+jobs:
+  - job: First Valid Job
+    image: golang:1.21-alpine
+    steps:
+      - name: Display Message
+        script: |
+          echo "Successfully displayed message from pipeline script!"

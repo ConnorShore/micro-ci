@@ -1,0 +1,3213 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>micro-ci-runner: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/ConnorShore/micro-ci/cmd/micro-ci-runner/main.go (0.0%)</option>
+				
+				<option value="file1">github.com/ConnorShore/micro-ci/cmd/micro-ci-server/main.go (0.0%)</option>
+				
+				<option value="file2">github.com/ConnorShore/micro-ci/internal/common/job.go (0.0%)</option>
+				
+				<option value="file3">github.com/ConnorShore/micro-ci/internal/common/variable.go (100.0%)</option>
+				
+				<option value="file4">github.com/ConnorShore/micro-ci/internal/mappings/job-mappings.go (0.0%)</option>
+				
+				<option value="file5">github.com/ConnorShore/micro-ci/internal/pipeline/parser.go (0.0%)</option>
+				
+				<option value="file6">github.com/ConnorShore/micro-ci/internal/pipeline/types.go (0.0%)</option>
+				
+				<option value="file7">github.com/ConnorShore/micro-ci/internal/runner/bootstrap-runner.go (0.0%)</option>
+				
+				<option value="file8">github.com/ConnorShore/micro-ci/internal/runner/client/grpc-client.go (0.0%)</option>
+				
+				<option value="file9">github.com/ConnorShore/micro-ci/internal/runner/container.go (0.0%)</option>
+				
+				<option value="file10">github.com/ConnorShore/micro-ci/internal/runner/executor/docker-shell.go (0.0%)</option>
+				
+				<option value="file11">github.com/ConnorShore/micro-ci/internal/runner/executor/executor.go (0.0%)</option>
+				
+				<option value="file12">github.com/ConnorShore/micro-ci/internal/runner/machine.go (0.0%)</option>
+				
+				<option value="file13">github.com/ConnorShore/micro-ci/internal/runner/pipeline-runner.go (0.0%)</option>
+				
+				<option value="file14">github.com/ConnorShore/micro-ci/internal/runner/runner-factory.go (0.0%)</option>
+				
+				<option value="file15">github.com/ConnorShore/micro-ci/internal/runner/runner.go (0.0%)</option>
+				
+				<option value="file16">github.com/ConnorShore/micro-ci/internal/server/api/grpc-server.go (0.0%)</option>
+				
+				<option value="file17">github.com/ConnorShore/micro-ci/internal/server/api/webhook-server.go (0.0%)</option>
+				
+				<option value="file18">github.com/ConnorShore/micro-ci/internal/server/scheduler/job-queue.go (0.0%)</option>
+				
+				<option value="file19">github.com/ConnorShore/micro-ci/internal/server/webhook/event/github-event.go (0.0%)</option>
+				
+				<option value="file20">github.com/ConnorShore/micro-ci/internal/server/webhook/github.go (0.0%)</option>
+				
+				<option value="file21">github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci/micro-ci.pb.go (0.0%)</option>
+				
+				<option value="file22">github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci/micro-ci_grpc.pb.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+        "os"
+        "os/signal"
+        "syscall"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/runner"
+        "github.com/ConnorShore/micro-ci/internal/runner/client"
+        "github.com/ConnorShore/micro-ci/internal/runner/executor"
+)
+
+func main() <span class="cov0" title="0">{
+        executor := executor.NewDockerShellExecutor()
+
+        client, err := client.NewGrpcClient("localhost:3001")
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start grpc client: %v\n", err)
+        }</span>
+
+        <span class="cov0" title="0">machine1, err := runner.NewMachine("test-runner-1", client, executor)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        // Register job types with machine
+        <span class="cov0" title="0">if err := machine1.RegisterJobType(common.TypeBootstrap); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+        <span class="cov0" title="0">if err := machine1.RegisterJobType(common.TypePipeline); err != nil </span><span class="cov0" title="0">{
+                log.Fatal(err)
+        }</span>
+
+        // Start the machine
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                log.Fatal(machine1.Run())
+        }</span>()
+
+        // handle safe shutdown
+        <span class="cov0" title="0">osSignals := make(chan os.Signal, 1)
+        signal.Notify(osSignals, syscall.SIGINT, syscall.SIGTERM)
+        &lt;-osSignals // block until interuption is called
+
+        fmt.Printf("MicroCI Runner [%v] is shutting down...\n", machine1.Name)
+
+        machine1.Shutdown()
+
+        fmt.Printf("MicroCI Runner [%v] shutdown.\n", machine1.Name)</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "fmt"
+        "log"
+        "os"
+        "os/signal"
+        "syscall"
+
+        "github.com/ConnorShore/micro-ci/internal/server/api"
+        "github.com/ConnorShore/micro-ci/internal/server/scheduler"
+        "github.com/ConnorShore/micro-ci/internal/server/webhook"
+        "github.com/ConnorShore/micro-ci/internal/server/webhook/event"
+)
+
+func main() <span class="cov0" title="0">{
+
+        var jobQ scheduler.JobQueue = scheduler.NewInMemoryJobQueue(100)
+
+        var githubWebhookHandler webhook.WebhookHandler = webhook.NewGithubWebhookHandler()
+        githubWebhookHandler.AddEventHandler(webhook.EventPush, event.NewGithubPushEventHandler())
+
+        webhookServer := api.NewWebhookServer(":4000", jobQ)
+        webhookServer.AddWebhook("/webhook/github", githubWebhookHandler)
+
+        mciServer, err := api.NewMicroCIServer(jobQ)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("Failed to start server: %v", err)
+        }</span>
+
+        // start the mci server
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                log.Fatal(mciServer.Start())
+        }</span>()
+
+        // start the webhook server
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                log.Fatal(webhookServer.Start())
+        }</span>()
+
+        // handle safe shutdown
+        <span class="cov0" title="0">osSignals := make(chan os.Signal, 1)
+        signal.Notify(osSignals, syscall.SIGINT, syscall.SIGTERM)
+        &lt;-osSignals // block until interuption is called
+
+        fmt.Println("MicroCI Server is shutting down...")
+
+        // any shutdown/post-shutdown logic
+        log.Fatal(webhookServer.Shutdown())
+
+        fmt.Println("MicroCI Serveris shutdown.")</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package common
+
+const (
+        TypeBootstrap JobType = iota
+        TypePipeline
+)
+
+type JobType int
+
+type Job interface {
+        GetRunId() string
+        GetName() string
+        GetType() JobType
+}
+
+type BaseJob struct {
+        RunId string
+        Name  string
+}
+
+type BootstrapJob struct {
+        BaseJob
+        RepoURL   string
+        CommitSha string
+        Branch    string
+}
+
+func (j *BootstrapJob) GetRunId() string <span class="cov0" title="0">{
+        return j.RunId
+}</span>
+
+func (j *BootstrapJob) GetName() string <span class="cov0" title="0">{
+        return j.Name
+}</span>
+
+func (j *BootstrapJob) GetType() JobType <span class="cov0" title="0">{
+        return TypeBootstrap
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package common
+
+import (
+        "maps"
+        "strings"
+)
+
+type (
+        VariableMap   map[string]string
+        VariableSlice []string
+)
+
+// Converts a VariableMap to a VariableSlice
+func VariablesMapToSlice(variables VariableMap) VariableSlice <span class="cov8" title="1">{
+        var ret VariableSlice = make(VariableSlice, 0)
+        for key, val := range variables </span><span class="cov8" title="1">{
+                ret = append(ret, string(key+"="+val))
+        }</span>
+        <span class="cov8" title="1">return ret</span>
+}
+
+// Converts a VariableSlice to a VariableMap
+func VariablesSliceToMap(variables VariableSlice) VariableMap <span class="cov8" title="1">{
+        var ret VariableMap = make(VariableMap)
+        for _, val := range variables </span><span class="cov8" title="1">{
+                keyValSplit := strings.Split(val, "=")
+                ret[strings.TrimSpace(keyValSplit[0])] = strings.TrimSpace(keyValSplit[1])
+        }</span>
+
+        <span class="cov8" title="1">return ret</span>
+}
+
+// Merges variable maps into single variable map
+func MergeVariables(vars ...VariableMap) VariableMap <span class="cov8" title="1">{
+        var ret VariableMap = make(VariableMap)
+        for _, v := range vars </span><span class="cov8" title="1">{
+                maps.Copy(ret, v)
+        }</span>
+        <span class="cov8" title="1">return ret</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package mappings
+
+import (
+        "fmt"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+        "github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
+)
+
+// Generic method to convert a job into a proto (rpc) job
+func ConvertJobToProtoJob(j common.Job) (*micro_ci.Job, error) <span class="cov0" title="0">{
+        switch j.GetType() </span>{
+        case common.TypePipeline:<span class="cov0" title="0">
+                return convertPipelineJobToProtoJob(j.(*pipeline.Job)), nil</span>
+        case common.TypeBootstrap:<span class="cov0" title="0">
+                return convertBootstrapJobToProtoJob(j.(*common.BootstrapJob)), nil</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("failed to convert job of type [%+v] to proto job", j.GetType())</span>
+        }
+}
+
+// Generic method to convert a proto (rpc) job into a job
+func ConvertProtoJobToJob(j *micro_ci.Job) (common.Job, error) <span class="cov0" title="0">{
+        switch t := j.JobType.(type) </span>{
+        case *micro_ci.Job_PipelineJob_:<span class="cov0" title="0">
+                return convertProtoJobToPipelineJob(j)</span>
+        case *micro_ci.Job_BootstrapJob_:<span class="cov0" title="0">
+                return convertProtoJobToBootstrapJob(j)</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("cannot add job of unknown type: %v", t)</span>
+        }
+}
+
+// Converts a proto (rpc) job to a bootstrap job
+func convertProtoJobToBootstrapJob(j *micro_ci.Job) (*common.BootstrapJob, error) <span class="cov0" title="0">{
+        if t, ok := j.JobType.(*micro_ci.Job_BootstrapJob_); !ok </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("cannot convert proto job of type [%+v] to bootstrap job", t)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;common.BootstrapJob{
+                BaseJob: common.BaseJob{
+                        Name:  j.Name,
+                        RunId: j.RunId,
+                },
+                RepoURL:   j.GetBootstrapJob().GetRepoUrl(),
+                CommitSha: j.GetBootstrapJob().GetCommitSha(),
+                Branch:    j.GetBootstrapJob().GetBranch(),
+        }, nil</span>
+}
+
+// converts a proto (rpc) job to a pipeline job
+func convertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) <span class="cov0" title="0">{
+        if t, ok := j.JobType.(*micro_ci.Job_PipelineJob_); !ok </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("cannot convert proto job of type [%+v] to pipeline job", t)
+        }</span>
+
+        <span class="cov0" title="0">var steps []pipeline.Step
+
+        pj := j.GetPipelineJob()
+        for _, s := range pj.Steps </span><span class="cov0" title="0">{
+                step := pipeline.Step{
+                        Condition:       s.Condition,
+                        Variables:       s.Variables,
+                        ContinueOnError: s.ContinueOnError,
+                        Script:          pipeline.Script(s.Script),
+                }
+                steps = append(steps, step)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;pipeline.Job{
+                Name:      j.Name,
+                RunId:     j.RunId,
+                Condition: pj.Condition,
+                Variables: pj.Variables,
+                Image:     pj.Image,
+                Steps:     steps,
+        }, nil</span>
+}
+
+// Converts a pipeline job to a proto (rpc) job
+func convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job <span class="cov0" title="0">{
+        var steps []*micro_ci.Step
+        for _, s := range j.Steps </span><span class="cov0" title="0">{
+                ps := &amp;micro_ci.Step{
+                        Name:            s.Name,
+                        Condition:       s.Condition,
+                        Variables:       s.Variables,
+                        ContinueOnError: s.ContinueOnError,
+                        Script:          string(s.Script),
+                }
+
+                steps = append(steps, ps)
+        }</span>
+
+        <span class="cov0" title="0">var pipelineJob = &amp;micro_ci.Job_PipelineJob{
+                Condition: j.Condition,
+                Variables: j.Variables,
+                Image:     j.Image,
+                Steps:     steps,
+        }
+
+        return &amp;micro_ci.Job{
+                RunId: j.GetRunId(),
+                Name:  j.Name,
+                JobType: &amp;micro_ci.Job_PipelineJob_{
+                        PipelineJob: pipelineJob,
+                },
+        }</span>
+}
+
+// Converts a bootstrap job to a proto (rpc) job
+func convertBootstrapJobToProtoJob(j *common.BootstrapJob) *micro_ci.Job <span class="cov0" title="0">{
+        var bootstrapJob = &amp;micro_ci.Job_BootstrapJob{
+                RepoUrl:   j.RepoURL,
+                CommitSha: j.CommitSha,
+                Branch:    j.Branch,
+        }
+
+        return &amp;micro_ci.Job{
+                RunId: j.GetRunId(),
+                Name:  j.Name,
+                JobType: &amp;micro_ci.Job_BootstrapJob_{
+                        BootstrapJob: bootstrapJob,
+                },
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package pipeline
+
+import (
+        "gopkg.in/yaml.v3"
+)
+
+// Given a filepath, parse the file into a Pipeline object
+func ParsePipeline(data []byte) (*Pipeline, error) <span class="cov0" title="0">{
+        pipeline := &amp;Pipeline{}
+        err := yaml.Unmarshal(data, pipeline)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return pipeline, nil</span>
+}
+
+// Validates if a pipline is valid
+// Returns (valid, list of errors)
+func ValidatePipeline(p *Pipeline) (bool, []string) <span class="cov0" title="0">{
+        // TODO: Implement validation
+        return true, []string{}
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package pipeline
+
+import "github.com/ConnorShore/micro-ci/internal/common"
+
+const (
+        PipelineDir = ".micro-ci"
+)
+
+type Script string
+
+type Step struct {
+        Name            string             `yaml:"name"`
+        Condition       string             `yaml:"condition"`
+        Variables       common.VariableMap `yaml:"variables"`
+        ContinueOnError bool               `yaml:"continueOnError"`
+        Script          Script             `yaml:"script"`
+}
+
+// TODO: Add depends on for jobs (job2 depends on job1, etc)
+type Job struct {
+        RunId     string             `yaml:"-"`
+        Name      string             `yaml:"job"`
+        Condition string             `yaml:"condition"`
+        Variables common.VariableMap `yaml:"variables"`
+        Image     string             `yaml:"image"`
+        Steps     []Step             `yaml:"steps"`
+        // DependsOn
+}
+
+func (j *Job) GetRunId() string <span class="cov0" title="0">{
+        return j.RunId
+}</span>
+
+func (j *Job) GetName() string <span class="cov0" title="0">{
+        return j.Name
+}</span>
+
+func (j *Job) GetType() common.JobType <span class="cov0" title="0">{
+        return common.TypePipeline
+}</span>
+
+type Pipeline struct {
+        Name      string             `yaml:"name"`
+        Variables common.VariableMap `yaml:"variables"`
+        Jobs      []Job
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package runner
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "sync"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+        "github.com/google/uuid"
+)
+
+type BootstrapRunner struct {
+        BaseRunner
+}
+
+func NewBootstrapRunner(m *Machine) *BootstrapRunner <span class="cov0" title="0">{
+        return &amp;BootstrapRunner{
+                BaseRunner: BaseRunner{
+                        ID:           uuid.NewString(),
+                        WorkingDir:   m.WorkingDirectory,
+                        executor:     m.executor,
+                        mciClient:    m.mciClient,
+                        dockerClient: m.dockerClient,
+                },
+        }
+}</span>
+
+func (r *BootstrapRunner) Run(j common.Job) error <span class="cov0" title="0">{
+        t, ok := j.(*common.BootstrapJob)
+        if !ok </span><span class="cov0" title="0">{
+                return fmt.Errorf("pipeline runner cannot run job of type: %v", t)
+        }</span>
+
+        <span class="cov0" title="0">bJob := j.(*common.BootstrapJob)
+        log.Printf("Running bootstrap job for repo: %s\n", bJob.RepoURL)
+
+        container, err := r.setupContainerForBootstrapJob()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create and start container for bootstrap job: %v", err)
+        }</span>
+
+        // Remove clone directory after finishing method
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                log.Printf("Stopping and removing docker container: %s\n", container.ID)
+                r.stopAndRemoveDockerContainer(container)
+        }</span>()
+
+        <span class="cov0" title="0">if err := r.prepareRepoInContainer(container, bJob); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to prepare container: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">piplineData, err := r.extractPipelineData(container, bJob)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to extract pipeline data: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := r.parseAndSubmitPipelineJobs(piplineData); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to parse and submit all pipleine jobs: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Setup a container to run bootstrap job
+func (r *BootstrapRunner) setupContainerForBootstrapJob() (*DockerContainer, error) <span class="cov0" title="0">{
+        options := DockerContainerOptions{
+                Image:      DefaultImage,
+                Port:       "8080",
+                WorkingDir: r.WorkingDir,
+        }
+
+        return r.createAndStartDockerContainer(options)
+}</span>
+
+// Prepares the repo to be cloned in the container
+func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *common.BootstrapJob) error <span class="cov0" title="0">{
+        // Install git in container
+        log.Printf("Installing git")
+
+        script := "apk update &amp;&amp; apk add git"
+        if err := r.executeCommand(script, container.ID, j.RunId); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to initialize git: %v", err)
+        }</span>
+
+        // Clone repository for specific sha or branch
+        <span class="cov0" title="0">log.Printf("Cloning repo: %s\n", j.RepoURL)
+
+        script = fmt.Sprintf("git clone %s %s", j.RepoURL, DefaultCloneDir)
+        if err := r.executeCommand(script, container.ID, j.RunId); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clone repository: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Retrieves the pipeline file data from the container
+func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *common.BootstrapJob) ([][]byte, error) <span class="cov0" title="0">{
+        // Extract pipeline file data so we can parse it
+        log.Printf("Extracting pipelineFiles")
+
+        // Get all the pipeline files from the pipeline directory
+        var pipelineFiles []string
+        script := fmt.Sprintf("find %s/%s -type f", DefaultCloneDir, pipeline.PipelineDir)
+        if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) </span><span class="cov0" title="0">{
+                pipelineFiles = append(pipelineFiles, line)
+        }</span>); err != nil <span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+        }</span>
+
+        // Get content of bytes in the pipeline files
+        <span class="cov0" title="0">log.Printf("Parsing [%v] pipeline files: %+v\n", len(pipelineFiles), pipelineFiles)
+
+        var pipelineData [][]byte
+        for _, f := range pipelineFiles </span><span class="cov0" title="0">{
+                // script = fmt.Sprintf("cat %s/%s/%s", DefaultCloneDir, pipeline.PipelineDir, f)
+                script = fmt.Sprintf("cat %s", f)
+                var data []byte
+                if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) </span><span class="cov0" title="0">{
+                        data = append(data, []byte(line)...)
+                        data = append(data, '\n')
+                }</span>); err != nil <span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to run step [%v]: %v", j.Name, err)
+                }</span>
+
+                <span class="cov0" title="0">pipelineData = append(pipelineData, data)</span>
+        }
+
+        <span class="cov0" title="0">log.Printf("Successfully parsed [%v] pipeline files\n", len(pipelineData))
+        return pipelineData, nil</span>
+}
+
+// Parse pipelines and submit jobs to queue on server
+func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) error <span class="cov0" title="0">{
+        // Parse pipeline files to pipeline objects
+        var wg sync.WaitGroup
+        jobCh := make(chan pipeline.Job)
+
+        for _, d := range pipelineData </span><span class="cov0" title="0">{
+                wg.Add(1)
+                go func(data []byte, jobCh chan&lt;- pipeline.Job) </span><span class="cov0" title="0">{
+                        defer wg.Done()
+
+                        // Parse the pipeline
+                        p, err := pipeline.ParsePipeline(data)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("error parsing pipeline: %v\n", err)
+                                return
+                        }</span>
+
+                        // Validate the pipeline
+                        <span class="cov0" title="0">valid, errors := pipeline.ValidatePipeline(p)
+                        if !valid </span><span class="cov0" title="0">{
+                                fmt.Printf("Pipeline validation errors: %+v\n", errors)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">log.Printf("Parsed and validated pipeline successfully: %+v\n", p.Name)
+
+                        // Extract jobs from pipleine
+                        for _, j := range p.Jobs </span><span class="cov0" title="0">{
+                                j.Variables = common.MergeVariables(p.Variables, j.Variables) // add pipeline vars to job vars
+
+                                jobCh &lt;- j
+                        }</span>
+                }(d, jobCh)
+        }
+
+        // Wait for waitgroup to finish to close pipelineCh
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                wg.Wait()
+                close(jobCh)
+        }</span>()
+
+        // Add all jobs from the job channel to the server queue
+        <span class="cov0" title="0">for j := range jobCh </span><span class="cov0" title="0">{
+                if err := r.mciClient.AddJob(context.Background(), &amp;j); err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Error sending add job request to server %v\n", err)
+                        return err
+                }</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package client
+
+import (
+        "context"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/mappings"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+        "github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
+        "google.golang.org/grpc"
+        "google.golang.org/grpc/credentials/insecure"
+)
+
+type grpcClient struct {
+        conn   *grpc.ClientConn
+        client micro_ci.MicroCIClient
+}
+
+func NewGrpcClient(serverAddr string) (MicroCIClient, error) <span class="cov0" title="0">{
+        opts := []grpc.DialOption{
+                grpc.WithTransportCredentials(insecure.NewCredentials()),
+        }
+
+        conn, err := grpc.NewClient(serverAddr, opts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">client := micro_ci.NewMicroCIClient(conn)
+
+        return &amp;grpcClient{
+                conn:   conn,
+                client: client,
+        }, nil</span>
+}
+
+func (c *grpcClient) Register(ctx context.Context, machineId string) error <span class="cov0" title="0">{
+        _, err := c.client.Register(ctx, &amp;micro_ci.RegisterRequest{MachineId: machineId})
+        return err
+}</span>
+
+func (c *grpcClient) Unregister(ctx context.Context, machineId string) error <span class="cov0" title="0">{
+        _, err := c.client.Unregister(ctx, &amp;micro_ci.UnregisterRequest{MachineId: machineId})
+        return err
+}</span>
+
+func (c *grpcClient) FetchJob(ctx context.Context, machineId string) (common.Job, error) <span class="cov0" title="0">{
+        res, err := c.client.FetchJob(ctx, &amp;micro_ci.FetchJobRequest{MachineId: machineId})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">if res.Job == nil </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov0" title="0">return mappings.ConvertProtoJobToJob(res.Job)</span>
+}
+
+func (c *grpcClient) AddJob(ctx context.Context, j *pipeline.Job) error <span class="cov0" title="0">{
+        var steps []*micro_ci.Step
+        for _, s := range j.Steps </span><span class="cov0" title="0">{
+                steps = append(steps, &amp;micro_ci.Step{
+                        Name:            s.Name,
+                        Condition:       s.Condition,
+                        ContinueOnError: s.ContinueOnError,
+                        Variables:       s.Variables,
+                        Script:          string(s.Script),
+                })
+        }</span>
+
+        <span class="cov0" title="0">job := &amp;micro_ci.Job{
+                RunId: j.RunId,
+                Name:  j.Name,
+                JobType: &amp;micro_ci.Job_PipelineJob_{
+                        PipelineJob: &amp;micro_ci.Job_PipelineJob{
+                                Condition: j.Condition,
+                                Image:     j.Image,
+                                Variables: j.Variables,
+                                Steps:     steps,
+                        },
+                },
+        }
+
+        _, err := c.client.AddJob(ctx, job)
+        return err</span>
+}
+
+func (c *grpcClient) UpdateJobStatus(ctx context.Context, jobRunId string, status common.JobStatus) error <span class="cov0" title="0">{
+        _, err := c.client.UpdateJobStatus(ctx, &amp;micro_ci.UpdateJobStatusRequest{
+                JobRunId: jobRunId,
+                Status:   string(status),
+        })
+        return err
+}</span>
+
+func (c *grpcClient) StreamLogs(ctx context.Context, jobRunId, line string) error <span class="cov0" title="0">{
+        _, err := c.client.StreamLogs(ctx, &amp;micro_ci.StreamLogsRequest{
+                JobRunId: jobRunId,
+                LogData:  line,
+        })
+        return err
+}</span>
+
+func (c *grpcClient) Close() error <span class="cov0" title="0">{
+        return c.conn.Close()
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package runner
+
+import (
+        "context"
+        "fmt"
+        "io"
+        "log"
+        "math/rand/v2"
+        "os"
+        "time"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/docker/docker/api/types/container"
+        "github.com/docker/docker/api/types/filters"
+        "github.com/docker/docker/api/types/image"
+        "github.com/docker/docker/client"
+)
+
+const (
+        DefaultWorkspace       string        = "/workspace"
+        ContainerNameBase      string        = "microci-runner"
+        DefaultCreationTimeout time.Duration = 30
+)
+
+// Options for creating a new Docker container for running the job
+type DockerContainerOptions struct {
+        Image      string
+        Port       string
+        WorkingDir string
+        Env        common.VariableMap
+}
+
+// Represents a Docker container that is created to run the job
+type DockerContainer struct {
+        ID         string
+        Name       string
+        Port       string
+        WorkingDir string
+        ctx        context.Context
+        client     *client.Client
+}
+
+func NewDockerContainer(client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        if err := pullImage(ctx, client, opts); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return createContainer(ctx, client, opts)</span>
+}
+
+// Starts a container
+func (c *DockerContainer) Start() error <span class="cov0" title="0">{
+        log.Println("Starting Docker container with ID: ", c.ID)
+        if err := c.client.ContainerStart(c.ctx, c.ID, container.StartOptions{}); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("After start in ERROR....%s\n", err)
+                return fmt.Errorf("failed to start docker container: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := c.waitForDockerContainerInitialization(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">log.Println("Successfully started container with ID: ", c.ID)
+        return nil</span>
+}
+
+// Stops the docker container
+func (c *DockerContainer) Stop() error <span class="cov0" title="0">{
+        log.Println("Stopping Docker container with ID: ", c.ID)
+        if err := c.client.ContainerStop(c.ctx, c.ID, container.StopOptions{}); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to stop Docker container: %w", err)
+        }</span>
+        <span class="cov0" title="0">log.Println("Successfully stopped Docker container with ID: ", c.ID)
+        return nil</span>
+}
+
+// Removes the docker container
+func (c *DockerContainer) Remove() error <span class="cov0" title="0">{
+        log.Println("Removing Docker container with ID: ", c.ID)
+        if err := c.client.ContainerRemove(c.ctx, c.ID, container.RemoveOptions{}); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to remove Docker container: %w", err)
+        }</span>
+        <span class="cov0" title="0">log.Println("Successfully removed Docker container with ID: ", c.ID)
+
+        return nil</span>
+}
+
+// Waits for container to initialize
+func (c *DockerContainer) waitForDockerContainerInitialization() error <span class="cov0" title="0">{
+        deadlineCtx, cancel := context.WithDeadline(c.ctx, time.Now().Add(30*time.Second))
+        defer cancel()
+
+        for </span><span class="cov0" title="0">{
+                log.Println("Waiting for container...")
+                resp, err := c.client.ContainerInspect(deadlineCtx, c.ID)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("error waiting for container initialization: %v", err)
+                }</span>
+
+                <span class="cov0" title="0">if resp.State.Running </span><span class="cov0" title="0">{
+                        log.Printf("Container [%s] is running.\n", c.ID)
+                        return nil
+                }</span>
+
+                <span class="cov0" title="0">log.Println("Waiting for container to become healthy...")
+                select </span>{
+                case &lt;-time.After(1 * time.Second):<span class="cov0" title="0">
+                        continue</span>
+                case &lt;-deadlineCtx.Done():<span class="cov0" title="0">
+                        // The context was canceled (e.g., timeout), return immediately.
+                        return deadlineCtx.Err()</span>
+                }
+        }
+}
+
+// Pulls specified image in container
+func pullImage(ctx context.Context, client *client.Client, opts DockerContainerOptions) error <span class="cov0" title="0">{
+        log.Println("Pulling Docker image: ", opts.Image)
+
+        // Check if image exists locally
+        args := filters.NewArgs()
+        args.Add("reference", opts.Image)
+        images, err := client.ImageList(ctx, image.ListOptions{Filters: args})
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list local images: %w", err)
+        }</span>
+
+        // If image doesn't exist locally, pull it in
+        <span class="cov0" title="0">if len(images) == 0 </span><span class="cov0" title="0">{
+                log.Println("Image not found locally. Pulling Docker image:", opts.Image)
+                out, err := client.ImagePull(ctx, opts.Image, image.PullOptions{})
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to pull docker image [%v]: %v", opts.Image, err)
+                }</span>
+                <span class="cov0" title="0">defer out.Close()
+                io.Copy(os.Stdout, out)</span>
+        } else<span class="cov0" title="0"> {
+                log.Println("Found Docker image locally:", opts.Image)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Helper to create a docker container
+func createContainer(ctx context.Context, client *client.Client, opts DockerContainerOptions) (*DockerContainer, error) <span class="cov0" title="0">{
+        log.Println("Creating Docker container with image: ", opts.Image)
+
+        containerName := createContainerName()
+        resp, err := client.ContainerCreate(ctx, &amp;container.Config{
+                Image: opts.Image,
+                // Keep STDIN open and run a command that never exits
+                OpenStdin:  true,
+                Cmd:        []string{"tail", "-f", "/dev/null"},
+                Tty:        false,
+                WorkingDir: DefaultWorkspace,
+                Env:        common.VariablesMapToSlice(opts.Env),
+        }, &amp;container.HostConfig{
+                Binds: []string{fmt.Sprintf("%s:%s", opts.WorkingDir, DefaultWorkspace)},
+        }, nil, nil, containerName)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create docker container: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;DockerContainer{
+                ID:         resp.ID,
+                Name:       containerName,
+                Port:       opts.Port,
+                WorkingDir: DefaultWorkspace,
+                ctx:        ctx,
+                client:     client,
+        }, nil</span>
+}
+
+// Creates a container name with random digits at end
+func createContainerName() string <span class="cov0" title="0">{
+        return ContainerNameBase + "-" + fmt.Sprint(rand.IntN(90000)+10000)
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package executor
+
+import (
+        "bufio"
+        "fmt"
+        "io"
+        "os/exec"
+        "syscall"
+)
+
+type DockerShellExecutor struct {
+        Executor
+}
+
+func NewDockerShellExecutor() Executor <span class="cov0" title="0">{
+        return &amp;DockerShellExecutor{}
+}</span>
+
+func (e *DockerShellExecutor) Execute(opts ExecutorOpts, onStdOut func(line string)) error <span class="cov0" title="0">{
+        commandVars := []string{"exec"}
+
+        for key, val := range opts.Vars </span><span class="cov0" title="0">{
+                ev := key + "=" + val
+                commandVars = append(commandVars, "-e", ev)
+        }</span>
+
+        <span class="cov0" title="0">script := makeSingleLineScript(opts.Script)
+        if opts.WorkingDir != "" </span><span class="cov0" title="0">{
+                script = fmt.Sprintf("cd %s &amp;&amp; %s", opts.WorkingDir, script)
+        }</span>
+
+        <span class="cov0" title="0">commandVars = append(commandVars, opts.EnvironmentId, "sh", "-c", script)
+        cmd := exec.CommandContext(opts.Ctx, "docker", commandVars...)
+
+        // Set a process group ID to ensure cleanup of child processes if the context is canceled.
+        cmd.SysProcAttr = &amp;syscall.SysProcAttr{Setpgid: true}
+
+        // Capture stdout and stderr from the `docker exec` command.
+        stdout, err := cmd.StdoutPipe()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">stderr, err := cmd.StderrPipe()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Merge stdout and stderr to process them together.
+        <span class="cov0" title="0">multiReader := io.MultiReader(stdout, stderr)
+
+        // Execute the command
+        if err := cmd.Start(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Use a scanner to read the output line by line and stream it back.
+        <span class="cov0" title="0">scanner := bufio.NewScanner(multiReader)
+        for scanner.Scan() </span><span class="cov0" title="0">{
+                onStdOut(scanner.Text())
+        }</span>
+
+        <span class="cov0" title="0">if err := scanner.Err(); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Wait for the command to finish and return its result.
+        <span class="cov0" title="0">return cmd.Wait()</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package executor
+
+import (
+        "context"
+        "strings"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+)
+
+type ExecutorOpts struct {
+        Ctx           context.Context
+        EnvironmentId string
+        Script        pipeline.Script
+        Vars          common.VariableMap
+        WorkingDir    string
+}
+
+type Executor interface {
+        Execute(opts ExecutorOpts, onStdOut func(line string)) error
+}
+
+// Converts script to a single line
+func makeSingleLineScript(s pipeline.Script) string <span class="cov0" title="0">{
+        return strings.Join(strings.Split(strings.TrimSpace(string(s)), "\n"), " &amp;&amp; ")
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package runner
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "os"
+        "path/filepath"
+        "time"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        mciClient "github.com/ConnorShore/micro-ci/internal/runner/client"
+        "github.com/ConnorShore/micro-ci/internal/runner/executor"
+        dockerClient "github.com/docker/docker/client"
+        "github.com/google/uuid"
+)
+
+const (
+        DefaultWorkingDir = "microci-runner-env"
+)
+
+type Machine struct {
+        ID               string
+        Name             string
+        WorkingDirectory string
+        State            common.MachineState
+        executor         executor.Executor
+        mciClient        mciClient.MicroCIClient
+        dockerClient     *dockerClient.Client
+        runners          map[common.JobType]Runner
+        shutdown         chan struct{} // shutdown signal
+}
+
+func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executor.Executor) (*Machine, error) <span class="cov0" title="0">{
+        log.Println("Creating Docker client...")
+        cli, err := dockerClient.NewClientWithOpts(dockerClient.FromEnv, dockerClient.WithAPIVersionNegotiation())
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to start docker client: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">dir, err := os.MkdirTemp("", DefaultWorkingDir)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create micro-ci runner environment: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer os.RemoveAll(dir)
+
+        absDir, err := filepath.Abs(dir)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create absolute path for dir: %v", dir)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Machine{
+                ID:               uuid.NewString(),
+                Name:             name,
+                State:            common.StateOffline,
+                WorkingDirectory: absDir,
+                mciClient:        mciClient,
+                dockerClient:     cli,
+                executor:         executor,
+                runners:          make(map[common.JobType]Runner),
+                shutdown:         make(chan struct{}),
+        }, nil</span>
+}
+
+// Runs the machine until stop signal is triggered
+func (m *Machine) Run() error <span class="cov0" title="0">{
+        parentCtx := context.Background()
+        defer func(ctx context.Context) error </span><span class="cov0" title="0">{
+                err := m.mciClient.Unregister(ctx, m.ID)
+                if err != nil </span><span class="cov0" title="0">{
+                        // TODO: Need to probably do better handling if fail to unregister, just log for now
+                        log.Printf("Failed to unregister machine [%v] from server\n. Proceeding to close client connection...", m.ID)
+                }</span>
+
+                <span class="cov0" title="0">err = m.mciClient.Close()
+                return err</span>
+        }(parentCtx)
+
+        <span class="cov0" title="0">m.State = common.StateIdle
+
+        // Register machine with the server
+        ctx, cancel := context.WithTimeout(parentCtx, 15*time.Second)
+        defer cancel()
+
+        err := m.mciClient.Register(ctx, m.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">log.Println("Successfully registered machine with server")
+
+        pollTicker := time.NewTicker(5 * time.Second)
+        for </span><span class="cov0" title="0">{
+                select </span>{
+                case &lt;-m.shutdown:<span class="cov0" title="0">
+                        m.State = common.StateOffline
+                        log.Printf("Machine [%v] has been shutdown.\n", m.Name)
+                        return nil</span>
+                case &lt;-pollTicker.C:<span class="cov0" title="0">
+                        if m.State == common.StateIdle </span><span class="cov0" title="0">{
+                                m.pollForJobs()
+                        }</span>
+                }
+        }
+}
+
+// Registers a job type for machine to be able to handle
+func (m *Machine) RegisterJobType(t common.JobType) error <span class="cov0" title="0">{
+        v, ok := m.runners[t]
+        if ok </span><span class="cov0" title="0">{
+                return fmt.Errorf("already registered a runner of type [%v] with machine [%v]: %+v", t, m.Name, v)
+        }</span>
+
+        <span class="cov0" title="0">runner, err := NewRunner(t, m)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">m.runners[t] = runner
+        log.Printf("Registered runner of type [%v] with machine [%v]\n", t, m.Name)
+        return nil</span>
+}
+
+// Shutdown the machine
+func (m *Machine) Shutdown() <span class="cov0" title="0">{
+        close(m.shutdown)
+}</span>
+
+// Polls the server for jobs to run
+func (m *Machine) pollForJobs() <span class="cov0" title="0">{
+        log.Printf("Machine [%v] polling for job...\n", m.Name)
+
+        ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+
+        // Ask the server to see if any jobs are available
+        job, err := m.mciClient.FetchJob(ctx, m.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("Failed to fetch job with error: %v\n", err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">if job == nil </span><span class="cov0" title="0">{
+                log.Println("No jobs found. Will continue polling...")
+                return
+        }</span>
+
+        <span class="cov0" title="0">log.Printf("Machine [%v] found job [%v]...\n", m.Name, job.GetName())
+
+        // Job was found, run it
+        if err := m.runJob(job); err != nil </span><span class="cov0" title="0">{
+                log.Printf("Failed to execute job [%v]: %v\n", job.GetName(), err)
+        }</span>
+}
+
+// Prepares machine and runs the job
+func (m *Machine) runJob(j common.Job) error <span class="cov0" title="0">{
+        fmt.Printf("Running job [%v] on machine [%v]\n", j.GetName(), m.Name)
+
+        m.State = common.StateBusy
+        defer func() </span><span class="cov0" title="0">{
+                m.State = common.StateIdle
+        }</span>()
+
+        <span class="cov0" title="0">if err := m.updateJobStatusRunning(j.GetRunId()); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Run job with the proper runner
+        <span class="cov0" title="0">if err := m.runJobWithRunner(j); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to run job [%v] with runner", j.GetName())
+        }</span>
+
+        <span class="cov0" title="0">return m.updateJobStatusFinished(j.GetRunId())</span>
+}
+
+// spins up a container and runs the job's steps. will stop/remove container once finished
+func (m *Machine) runJobWithRunner(j common.Job) error <span class="cov0" title="0">{
+        log.Printf("Running job [%v] with runner\n", j.GetName())
+        runner, ok := m.runners[j.GetType()]
+        if !ok </span><span class="cov0" title="0">{
+                return fmt.Errorf("no runner registered for type: %v", j.GetType())
+        }</span>
+
+        <span class="cov0" title="0">return runner.Run(j)</span>
+}
+
+// Updates job status to running
+func (m *Machine) updateJobStatusRunning(runId string) error <span class="cov0" title="0">{
+        // Set job to running
+        ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+
+        err := m.mciClient.UpdateJobStatus(ctx, runId, common.StatusRunning)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Updates job status based on finished job result
+func (m *Machine) updateJobStatusFinished(runId string) error <span class="cov0" title="0">{
+        // Update job status based on completion
+        ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+
+        var err error
+        var status common.JobStatus
+        success := true
+        if success </span><span class="cov0" title="0">{
+                err = m.mciClient.UpdateJobStatus(ctx, runId, common.StatusSuccess)
+                status = common.StatusSuccess
+        }</span> else<span class="cov0" title="0"> {
+                err = m.mciClient.UpdateJobStatus(ctx, runId, common.StatusFailed)
+                status = common.StatusFailed
+        }</span>
+        <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to update job status to %v: %v", status, err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package runner
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "strings"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+        "github.com/ConnorShore/micro-ci/internal/runner/executor"
+        "github.com/google/uuid"
+)
+
+type PipelineRunner struct {
+        BaseRunner
+}
+
+func NewPipelineRunner(m *Machine) *PipelineRunner <span class="cov0" title="0">{
+        return &amp;PipelineRunner{
+                BaseRunner: BaseRunner{
+                        ID:           uuid.NewString(),
+                        WorkingDir:   m.WorkingDirectory,
+                        executor:     m.executor,
+                        mciClient:    m.mciClient,
+                        dockerClient: m.dockerClient,
+                },
+        }
+}</span>
+
+func (r *PipelineRunner) Run(j common.Job) error <span class="cov0" title="0">{
+        t, ok := j.(*pipeline.Job)
+        if !ok </span><span class="cov0" title="0">{
+                return fmt.Errorf("pipeline runner cannot run job of type: %v", t)
+        }</span>
+
+        <span class="cov0" title="0">pJob := j.(*pipeline.Job)
+        log.Printf("Runnign pipeline job: %v\n", pJob.Name)
+
+        options := DockerContainerOptions{
+                Image:      pJob.Image,
+                Port:       "8080",
+                WorkingDir: r.WorkingDir,
+                Env:        pJob.Variables,
+        }
+
+        container, err := r.createAndStartDockerContainer(options)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // Remove clone directory after finishing method
+        <span class="cov0" title="0">defer func() </span><span class="cov0" title="0">{
+                log.Printf("Stopping and removing docker container: %s\n", container.ID)
+                r.stopAndRemoveDockerContainer(container)
+        }</span>()
+
+        <span class="cov0" title="0">log.Println("Starting to run all steps")
+        if err := r.runAllSteps(container.ctx, pJob, container.ID); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Runs all the steps for a job in the specified container
+func (r *PipelineRunner) runAllSteps(ctx context.Context, j *pipeline.Job, id string) error <span class="cov0" title="0">{
+        for _, s := range j.Steps </span><span class="cov0" title="0">{
+                fmt.Printf("\n---- Running Step [%v] ----\n", s.Name)
+                run, err := canRun(s.Condition)
+                if err != nil </span><span class="cov0" title="0">{
+                        log.Printf("Step [%v] condition failed to parse. Skipping step.\n", s.Name)
+                        fmt.Println(strings.Repeat("-", 60))
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if !run </span><span class="cov0" title="0">{
+                        log.Printf("Skipping step [%v].\n", s.Name)
+                        fmt.Println(strings.Repeat("-", 60))
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">_, err = r.runStep(ctx, s, common.MergeVariables(j.Variables, s.Variables), id, j.RunId)
+                if err != nil &amp;&amp; !s.ContinueOnError </span><span class="cov0" title="0">{
+                        log.Printf("Exiting due to error on step [%v]: %v\n", s.Name, err)
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println(strings.Repeat("-", 60))</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Runs an individual step in a job
+func (r *PipelineRunner) runStep(ctx context.Context, s pipeline.Step, vars common.VariableMap, containerID, jobRunId string) (bool, error) <span class="cov0" title="0">{
+        if err := r.executor.Execute(executor.ExecutorOpts{
+                Ctx:           ctx,
+                Script:        s.Script,
+                Vars:          vars,
+                EnvironmentId: containerID,
+                WorkingDir:    DefaultCloneDir,
+        }, func(line string) </span><span class="cov0" title="0">{
+                fmt.Printf("[Runner: %v] Execute pipeline job log: %v\n", r.ID, line)
+                r.mciClient.StreamLogs(ctx, jobRunId, line)
+        }</span>); err != nil <span class="cov0" title="0">{
+                return false, fmt.Errorf("failed to run step [%v]: %v", s.Name, err)
+        }</span>
+        <span class="cov0" title="0">return true, nil</span>
+}
+
+// Evaluates Job or Step's condition to determine if step should be ran
+func canRun(condition string) (bool, error) <span class="cov0" title="0">{
+        // TODO: Need to create an expression evaluator and move this there
+        return true, nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package runner
+
+import (
+        "fmt"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+)
+
+// Factory method to create a new runner for a job type
+func NewRunner(t common.JobType, m *Machine) (Runner, error) <span class="cov0" title="0">{
+        switch t </span>{
+        case common.TypeBootstrap:<span class="cov0" title="0">
+                return NewBootstrapRunner(m), nil</span>
+        case common.TypePipeline:<span class="cov0" title="0">
+                return NewPipelineRunner(m), nil</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("no factory runner for job type: %v", t)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package runner
+
+import (
+        "context"
+        "fmt"
+        "os"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/pipeline"
+        mciClient "github.com/ConnorShore/micro-ci/internal/runner/client"
+        "github.com/ConnorShore/micro-ci/internal/runner/executor"
+        dockerClient "github.com/docker/docker/client"
+)
+
+const (
+        DefaultCloneDir = "working-repo"
+        DefaultImage    = "golang:1.21-alpine"
+)
+
+type Runner interface {
+        Run(j common.Job) error
+}
+
+type BaseRunner struct {
+        ID           string
+        WorkingDir   string
+        mciClient    mciClient.MicroCIClient
+        executor     executor.Executor
+        dockerClient *dockerClient.Client
+}
+
+// Creates and starts a docker container for a run
+func (r *BaseRunner) createAndStartDockerContainer(opts DockerContainerOptions) (*DockerContainer, error) <span class="cov0" title="0">{
+        container, err := NewDockerContainer(r.dockerClient, opts)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">err = container.Start()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return container, nil</span>
+}
+
+// Stops and removes the specified container
+func (r *BaseRunner) stopAndRemoveDockerContainer(container *DockerContainer) <span class="cov0" title="0">{
+        if err := container.Stop(); err != nil </span><span class="cov0" title="0">{
+                // Log the cleanup error, but don't return it,
+                // as the original error from the steps is more important.
+                fmt.Fprintf(os.Stderr, "error stopping container on cleanup: %v\n", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := container.Remove(); err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintf(os.Stderr, "error removing container on cleanup: %v\n", err)
+        }</span>
+}
+
+// Executes a command and stream response out to client
+func (r *BaseRunner) executeCommand(script, containerId, runId string) error <span class="cov0" title="0">{
+        ctx := context.Background()
+        if err := r.executeCommandWithOut(ctx, script, containerId, func(line string) </span><span class="cov0" title="0">{
+                fmt.Printf("[Runner: %v] Execute job log: %v\n", r.ID, line)
+                r.mciClient.StreamLogs(ctx, runId, line)
+        }</span>); err != nil <span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// Execute command andn provide custom handling for std out
+func (r *BaseRunner) executeCommandWithOut(ctx context.Context, script, containerId string, onStdOut func(line string)) error <span class="cov0" title="0">{
+        err := r.executor.Execute(executor.ExecutorOpts{
+                Ctx:           ctx,
+                Script:        pipeline.Script(script),
+                EnvironmentId: containerId,
+        }, onStdOut)
+
+        return err
+}</span>
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package api
+
+import (
+        "context"
+        "fmt"
+        "log"
+        "net"
+        "slices"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/mappings"
+        "github.com/ConnorShore/micro-ci/internal/server/scheduler"
+        "github.com/ConnorShore/micro-ci/pkg/rpc/micro_ci"
+        "google.golang.org/grpc"
+)
+
+type MicroCIServer struct {
+        micro_ci.UnimplementedMicroCIServer
+
+        // TODO: Better approach (db or message queue)
+        jobQ scheduler.JobQueue
+
+        // TODO: Move items to db
+        machines []string
+
+        // TODO: Make thread safe (sync.Map)
+        jobStatus     map[string]common.JobStatus // (jobId, jobStatus)
+        jobMachineMap map[string]string           // (jobRunId, machineId)
+
+        // TODO: Need to track when a pipeline is fully complete (all jobs complete/fail)
+}
+
+func NewMicroCIServer(jq scheduler.JobQueue) (*MicroCIServer, error) <span class="cov0" title="0">{
+        // TODO: Pass in config props for making the server
+
+        return &amp;MicroCIServer{
+                jobQ:          jq,
+                jobStatus:     make(map[string]common.JobStatus),
+                jobMachineMap: make(map[string]string),
+        }, nil
+}</span>
+
+// Start the micro ci server
+func (s *MicroCIServer) Start() error <span class="cov0" title="0">{
+        // TODO: Have config for specifying start parameters
+        lis, err := net.Listen("tcp", "localhost:3001")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">grpcServer := grpc.NewServer()
+        micro_ci.RegisterMicroCIServer(grpcServer, s)
+        return grpcServer.Serve(lis)</span>
+}
+
+// Register a new runner with the CI server
+func (s *MicroCIServer) Register(ctx context.Context, req *micro_ci.RegisterRequest) (*micro_ci.RegisterResponse, error) <span class="cov0" title="0">{
+        log.Printf("Register request from machine: %v\n", req.MachineId)
+        s.machines = append(s.machines, req.MachineId)
+
+        return &amp;micro_ci.RegisterResponse{
+                Success: true,
+        }, nil
+}</span>
+
+// Register a new runner with the CI server
+func (s *MicroCIServer) Unregister(ctx context.Context, req *micro_ci.UnregisterRequest) (*micro_ci.UnregisterResponse, error) <span class="cov0" title="0">{
+        log.Printf("Unregister request from machine: %v\n", req.MachineId)
+
+        if !slices.Contains(s.machines, req.MachineId) </span><span class="cov0" title="0">{
+                return &amp;micro_ci.UnregisterResponse{
+                        Success: false,
+                }, fmt.Errorf("server does not contain machine with id [%v]", req.MachineId)
+        }</span>
+        <span class="cov0" title="0">return &amp;micro_ci.UnregisterResponse{
+                Success: true,
+        }, nil</span>
+}
+
+// Fetch a job for the registered runner to execute
+func (s *MicroCIServer) FetchJob(ctx context.Context, req *micro_ci.FetchJobRequest) (*micro_ci.FetchJobResponse, error) <span class="cov0" title="0">{
+        j := s.jobQ.Dequeue()
+        if j == nil </span><span class="cov0" title="0">{
+                return &amp;micro_ci.FetchJobResponse{
+                        Job: nil,
+                }, nil
+        }</span>
+
+        <span class="cov0" title="0">log.Printf("Fetched Job [%v] for runner [%v]\n", j.GetName(), req.MachineId)
+        s.jobMachineMap[j.GetRunId()] = req.MachineId
+        s.jobStatus[j.GetRunId()] = common.StatusPending
+
+        job, err := mappings.ConvertJobToProtoJob(j)
+        return &amp;micro_ci.FetchJobResponse{Job: job}, err</span>
+}
+
+// Adds a pipeline job to the queue
+func (s *MicroCIServer) AddJob(ctx context.Context, req *micro_ci.Job) (*micro_ci.AddJobResponse, error) <span class="cov0" title="0">{
+        job, err := mappings.ConvertProtoJobToJob(req)
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;micro_ci.AddJobResponse{Success: false}, err
+        }</span>
+
+        <span class="cov0" title="0">s.jobQ.Enqueue(job)
+        return &amp;micro_ci.AddJobResponse{Success: true}, nil</span>
+}
+
+// Update the status of a job
+func (s *MicroCIServer) UpdateJobStatus(ctx context.Context, req *micro_ci.UpdateJobStatusRequest) (*micro_ci.UpdateJobStatusResponse, error) <span class="cov0" title="0">{
+        log.Printf("Update job status request for job [%v]. Status: %v\n", req.JobRunId, req.Status)
+        if _, exists := s.jobStatus[req.JobRunId]; !exists </span><span class="cov0" title="0">{
+                return &amp;micro_ci.UpdateJobStatusResponse{
+                        Success: false,
+                }, fmt.Errorf("job with run id [%v] does not exist", req.JobRunId)
+        }</span>
+
+        <span class="cov0" title="0">s.jobStatus[req.JobRunId] = common.JobStatus(req.Status)
+        return &amp;micro_ci.UpdateJobStatusResponse{
+                Success: true,
+        }, nil</span>
+}
+
+// Stream logs from the runner to the CI server
+func (s *MicroCIServer) StreamLogs(ctx context.Context, req *micro_ci.StreamLogsRequest) (*micro_ci.StreamLogsResponse, error) <span class="cov0" title="0">{
+        log.Printf("[Server] [JobID: %v]: %v\n", req.JobRunId, req.LogData)
+        return &amp;micro_ci.StreamLogsResponse{
+                Success: true,
+        }, nil
+}</span>
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package api
+
+import (
+        "context"
+        "log"
+        "net/http"
+
+        "github.com/ConnorShore/micro-ci/internal/server/scheduler"
+        "github.com/ConnorShore/micro-ci/internal/server/webhook"
+        "github.com/google/uuid"
+)
+
+type WebhookServer struct {
+        Addr     string
+        JobQueue scheduler.JobQueue
+        handlers map[string]webhook.WebhookHandler
+        server   *http.Server
+}
+
+func NewWebhookServer(addr string, jobQueue scheduler.JobQueue) *WebhookServer <span class="cov0" title="0">{
+        return &amp;WebhookServer{
+                Addr:     addr,
+                JobQueue: jobQueue,
+                handlers: make(map[string]webhook.WebhookHandler),
+                server: &amp;http.Server{
+                        Addr: addr,
+                },
+        }
+}</span>
+
+// Starts the webhooks erver
+func (s *WebhookServer) Start() error <span class="cov0" title="0">{
+        mux := http.NewServeMux()
+        mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                w.Write([]byte("Default path handler"))
+        }</span>)
+
+        <span class="cov0" title="0">for path := range s.handlers </span><span class="cov0" title="0">{
+                if path[0] != '/' </span><span class="cov0" title="0">{
+                        path = "/" + path
+                }</span>
+
+                <span class="cov0" title="0">mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        s.handleWebhook(w, r, path)
+                }</span>)
+        }
+        <span class="cov0" title="0">s.server.Handler = mux
+
+        log.Printf("Starting webhook server at address [%v]\n", s.Addr)
+        return s.server.ListenAndServe()</span>
+}
+
+// Shutdown the webhook server
+func (s *WebhookServer) Shutdown() error <span class="cov0" title="0">{
+        return s.server.Shutdown(context.Background())
+}</span>
+
+// Handler method for webhooks that
+// 1. handles the webhook request
+// 2. parses pipeline with appropriate webhook handler
+// 3. adds the parsed jobs to the jobQ
+func (s *WebhookServer) handleWebhook(w http.ResponseWriter, r *http.Request, path string) <span class="cov0" title="0">{
+        log.Printf("Handling webhook at path: %s\n", path)
+        if r.Method != http.MethodPost </span><span class="cov0" title="0">{
+                http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+                return
+        }</span>
+
+        <span class="cov0" title="0">handler, ok := s.handlers[path]
+        if !ok </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+
+        <span class="cov0" title="0">bootstrapJob, err := handler.Parse(r)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Printf("Failed to handle webhook for path %v: %v\n", path, err)
+                http.Error(w, "could not handle webhook", http.StatusBadRequest)
+                return
+        }</span>
+
+        <span class="cov0" title="0">bootstrapJob.RunId = uuid.NewString()
+        bootstrapJob.Name = "Bootstrap Job " + bootstrapJob.RunId
+        s.JobQueue.Enqueue(bootstrapJob)
+
+        log.Printf("Successfully handled webhook at path %s\n", path)
+
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("successfully handled webhook and jobs enqueued"))</span>
+}
+
+func (s *WebhookServer) AddWebhook(path string, h webhook.WebhookHandler) <span class="cov0" title="0">{
+        s.handlers[path] = h
+}</span>
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package scheduler
+
+import (
+        "github.com/ConnorShore/micro-ci/internal/common"
+)
+
+type JobQueue interface {
+        Enqueue(j common.Job)
+        Dequeue() common.Job
+}
+
+// temporary in-memory job queue
+type InMemJobQueue struct {
+        jobCh chan (common.Job)
+}
+
+func NewInMemoryJobQueue(capacity int) *InMemJobQueue <span class="cov0" title="0">{
+        return &amp;InMemJobQueue{
+                jobCh: make(chan common.Job, capacity),
+        }
+}</span>
+
+func (q *InMemJobQueue) Enqueue(j common.Job) <span class="cov0" title="0">{
+        q.jobCh &lt;- j
+}</span>
+
+func (q *InMemJobQueue) Dequeue() common.Job <span class="cov0" title="0">{
+        select </span>{
+        case j := &lt;-q.jobCh:<span class="cov0" title="0">
+                return j</span>
+        default:<span class="cov0" title="0">
+                return nil</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package event
+
+import (
+        "encoding/json"
+        "fmt"
+        "io"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+        "github.com/ConnorShore/micro-ci/internal/server/webhook"
+)
+
+type githhubPushEvent struct {
+        webhook.WebhookEvent
+        Branch string `json:"branch"`
+}
+
+type GithubPushEventHandler struct{}
+
+func NewGithubPushEventHandler() *GithubPushEventHandler <span class="cov0" title="0">{
+        return &amp;GithubPushEventHandler{}
+}</span>
+
+func (h *GithubPushEventHandler) ParseEvent(r io.ReadCloser) (*common.BootstrapJob, error) <span class="cov0" title="0">{
+        defer r.Close()
+
+        var evt githhubPushEvent
+        if err := json.NewDecoder(r).Decode(&amp;evt); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to decode githubPushEvent: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">bootstrapJob := &amp;common.BootstrapJob{
+                RepoURL: evt.RepoUrl,
+                Branch:  evt.Branch,
+        }
+
+        return bootstrapJob, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package webhook
+
+import (
+        "fmt"
+        "net/http"
+
+        "github.com/ConnorShore/micro-ci/internal/common"
+)
+
+const GitHubHeader = "X-GITHUB-EVENT"
+
+type GithubWebhookHandler struct {
+        eventHandlers map[WebhookEventType]WebhookEventHandler
+}
+
+func NewGithubWebhookHandler() *GithubWebhookHandler <span class="cov0" title="0">{
+        return &amp;GithubWebhookHandler{
+                eventHandlers: make(map[WebhookEventType]WebhookEventHandler),
+        }
+}</span>
+
+func (gh *GithubWebhookHandler) Parse(r *http.Request) (*common.BootstrapJob, error) <span class="cov0" title="0">{
+        eventType := WebhookEventType(r.Header.Get(GitHubHeader))
+        if eventType == "" </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("event type header X-GITHUB-EVENT not present")
+        }</span>
+
+        <span class="cov0" title="0">handler, ok := gh.eventHandlers[eventType]
+        if !ok </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("no handler present for event type: %s", eventType)
+        }</span>
+
+        <span class="cov0" title="0">return handler.ParseEvent(r.Body)</span>
+}
+
+func (gh *GithubWebhookHandler) AddEventHandler(t WebhookEventType, h WebhookEventHandler) <span class="cov0" title="0">{
+        gh.eventHandlers[t] = h
+}</span>
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">// Code generated by protoc-gen-go. DO NOT EDIT.
+// versions:
+//         protoc-gen-go v1.36.9
+//         protoc        v6.32.0
+// source: pkg/rpc/micro-ci.proto
+
+package micro_ci
+
+import (
+        protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+        protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+        reflect "reflect"
+        sync "sync"
+        unsafe "unsafe"
+)
+
+const (
+        // Verify that this generated code is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(20 - protoimpl.MinVersion)
+        // Verify that runtime/protoimpl is sufficiently up-to-date.
+        _ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
+)
+
+type Step struct {
+        state           protoimpl.MessageState `protogen:"open.v1"`
+        Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+        Condition       string                 `protobuf:"bytes,2,opt,name=condition,proto3" json:"condition,omitempty"`
+        Variables       map[string]string      `protobuf:"bytes,3,rep,name=variables,proto3" json:"variables,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+        ContinueOnError bool                   `protobuf:"varint,4,opt,name=continue_on_error,json=continueOnError,proto3" json:"continue_on_error,omitempty"`
+        Script          string                 `protobuf:"bytes,5,opt,name=script,proto3" json:"script,omitempty"`
+        unknownFields   protoimpl.UnknownFields
+        sizeCache       protoimpl.SizeCache
+}
+
+func (x *Step) Reset() <span class="cov0" title="0">{
+        *x = Step{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[0]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *Step) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Step) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Step) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[0]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Step.ProtoReflect.Descriptor instead.
+func (*Step) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{0}
+}</span>
+
+func (x *Step) GetName() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Name
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Step) GetCondition() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Condition
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Step) GetVariables() map[string]string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Variables
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *Step) GetContinueOnError() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.ContinueOnError
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+func (x *Step) GetScript() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Script
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type Job struct {
+        state protoimpl.MessageState `protogen:"open.v1"`
+        RunId string                 `protobuf:"bytes,1,opt,name=run_id,json=runId,proto3" json:"run_id,omitempty"`
+        Name  string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+        // Types that are valid to be assigned to JobType:
+        //
+        //        *Job_PipelineJob_
+        //        *Job_BootstrapJob_
+        JobType       isJob_JobType `protobuf_oneof:"job_type"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *Job) Reset() <span class="cov0" title="0">{
+        *x = Job{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[1]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *Job) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Job) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Job) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[1]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Job.ProtoReflect.Descriptor instead.
+func (*Job) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{1}
+}</span>
+
+func (x *Job) GetRunId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.RunId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job) GetName() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Name
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job) GetJobType() isJob_JobType <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.JobType
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *Job) GetPipelineJob() *Job_PipelineJob <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                if x, ok := x.JobType.(*Job_PipelineJob_); ok </span><span class="cov0" title="0">{
+                        return x.PipelineJob
+                }</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *Job) GetBootstrapJob() *Job_BootstrapJob <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                if x, ok := x.JobType.(*Job_BootstrapJob_); ok </span><span class="cov0" title="0">{
+                        return x.BootstrapJob
+                }</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+type isJob_JobType interface {
+        isJob_JobType()
+}
+
+type Job_PipelineJob_ struct {
+        PipelineJob *Job_PipelineJob `protobuf:"bytes,3,opt,name=pipeline_job,json=pipelineJob,proto3,oneof"`
+}
+
+type Job_BootstrapJob_ struct {
+        BootstrapJob *Job_BootstrapJob `protobuf:"bytes,4,opt,name=bootstrap_job,json=bootstrapJob,proto3,oneof"`
+}
+
+func (*Job_PipelineJob_) isJob_JobType() {<span class="cov0" title="0">}</span>
+
+func (*Job_BootstrapJob_) isJob_JobType() {<span class="cov0" title="0">}</span>
+
+// Message definitions
+type RegisterRequest struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterRequest) Reset() <span class="cov0" title="0">{
+        *x = RegisterRequest{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[2]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *RegisterRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*RegisterRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *RegisterRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[2]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use RegisterRequest.ProtoReflect.Descriptor instead.
+func (*RegisterRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{2}
+}</span>
+
+func (x *RegisterRequest) GetMachineId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.MachineId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type RegisterResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterResponse) Reset() <span class="cov0" title="0">{
+        *x = RegisterResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[3]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *RegisterResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*RegisterResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *RegisterResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[3]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use RegisterResponse.ProtoReflect.Descriptor instead.
+func (*RegisterResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{3}
+}</span>
+
+func (x *RegisterResponse) GetSuccess() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Success
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+type UnregisterRequest struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnregisterRequest) Reset() <span class="cov0" title="0">{
+        *x = UnregisterRequest{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[4]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *UnregisterRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UnregisterRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UnregisterRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[4]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UnregisterRequest.ProtoReflect.Descriptor instead.
+func (*UnregisterRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{4}
+}</span>
+
+func (x *UnregisterRequest) GetMachineId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.MachineId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type UnregisterResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnregisterResponse) Reset() <span class="cov0" title="0">{
+        *x = UnregisterResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[5]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *UnregisterResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UnregisterResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UnregisterResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[5]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UnregisterResponse.ProtoReflect.Descriptor instead.
+func (*UnregisterResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{5}
+}</span>
+
+func (x *UnregisterResponse) GetSuccess() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Success
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+type FetchJobRequest struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        MachineId     string                 `protobuf:"bytes,1,opt,name=machine_id,json=machineId,proto3" json:"machine_id,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *FetchJobRequest) Reset() <span class="cov0" title="0">{
+        *x = FetchJobRequest{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[6]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *FetchJobRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*FetchJobRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *FetchJobRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[6]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use FetchJobRequest.ProtoReflect.Descriptor instead.
+func (*FetchJobRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{6}
+}</span>
+
+func (x *FetchJobRequest) GetMachineId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.MachineId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type FetchJobResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Job           *Job                   `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *FetchJobResponse) Reset() <span class="cov0" title="0">{
+        *x = FetchJobResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[7]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *FetchJobResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*FetchJobResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *FetchJobResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[7]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use FetchJobResponse.ProtoReflect.Descriptor instead.
+func (*FetchJobResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{7}
+}</span>
+
+func (x *FetchJobResponse) GetJob() *Job <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Job
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type AddJobResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddJobResponse) Reset() <span class="cov0" title="0">{
+        *x = AddJobResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[8]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *AddJobResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*AddJobResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *AddJobResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[8]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use AddJobResponse.ProtoReflect.Descriptor instead.
+func (*AddJobResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{8}
+}</span>
+
+func (x *AddJobResponse) GetSuccess() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Success
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+type UpdateJobStatusRequest struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        JobRunId      string                 `protobuf:"bytes,1,opt,name=job_run_id,json=jobRunId,proto3" json:"job_run_id,omitempty"`
+        Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateJobStatusRequest) Reset() <span class="cov0" title="0">{
+        *x = UpdateJobStatusRequest{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[9]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *UpdateJobStatusRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UpdateJobStatusRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UpdateJobStatusRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[9]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UpdateJobStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateJobStatusRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{9}
+}</span>
+
+func (x *UpdateJobStatusRequest) GetJobRunId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.JobRunId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *UpdateJobStatusRequest) GetStatus() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Status
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type UpdateJobStatusResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateJobStatusResponse) Reset() <span class="cov0" title="0">{
+        *x = UpdateJobStatusResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[10]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *UpdateJobStatusResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*UpdateJobStatusResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *UpdateJobStatusResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[10]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use UpdateJobStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateJobStatusResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{10}
+}</span>
+
+func (x *UpdateJobStatusResponse) GetSuccess() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Success
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+type StreamLogsRequest struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        JobRunId      string                 `protobuf:"bytes,1,opt,name=job_run_id,json=jobRunId,proto3" json:"job_run_id,omitempty"`
+        LogData       string                 `protobuf:"bytes,2,opt,name=log_data,json=logData,proto3" json:"log_data,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamLogsRequest) Reset() <span class="cov0" title="0">{
+        *x = StreamLogsRequest{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[11]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *StreamLogsRequest) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*StreamLogsRequest) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *StreamLogsRequest) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[11]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use StreamLogsRequest.ProtoReflect.Descriptor instead.
+func (*StreamLogsRequest) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{11}
+}</span>
+
+func (x *StreamLogsRequest) GetJobRunId() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.JobRunId
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *StreamLogsRequest) GetLogData() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.LogData
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+type StreamLogsResponse struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamLogsResponse) Reset() <span class="cov0" title="0">{
+        *x = StreamLogsResponse{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[12]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *StreamLogsResponse) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*StreamLogsResponse) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *StreamLogsResponse) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[12]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use StreamLogsResponse.ProtoReflect.Descriptor instead.
+func (*StreamLogsResponse) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{12}
+}</span>
+
+func (x *StreamLogsResponse) GetSuccess() bool <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Success
+        }</span>
+        <span class="cov0" title="0">return false</span>
+}
+
+type Job_PipelineJob struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        Condition     string                 `protobuf:"bytes,3,opt,name=condition,proto3" json:"condition,omitempty"`
+        Variables     map[string]string      `protobuf:"bytes,4,rep,name=variables,proto3" json:"variables,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+        Image         string                 `protobuf:"bytes,5,opt,name=image,proto3" json:"image,omitempty"`
+        Steps         []*Step                `protobuf:"bytes,6,rep,name=steps,proto3" json:"steps,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *Job_PipelineJob) Reset() <span class="cov0" title="0">{
+        *x = Job_PipelineJob{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[14]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *Job_PipelineJob) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Job_PipelineJob) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Job_PipelineJob) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[14]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Job_PipelineJob.ProtoReflect.Descriptor instead.
+func (*Job_PipelineJob) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{1, 0}
+}</span>
+
+func (x *Job_PipelineJob) GetCondition() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Condition
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job_PipelineJob) GetVariables() map[string]string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Variables
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (x *Job_PipelineJob) GetImage() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Image
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job_PipelineJob) GetSteps() []*Step <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Steps
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+type Job_BootstrapJob struct {
+        state         protoimpl.MessageState `protogen:"open.v1"`
+        RepoUrl       string                 `protobuf:"bytes,7,opt,name=repo_url,json=repoUrl,proto3" json:"repo_url,omitempty"`
+        CommitSha     string                 `protobuf:"bytes,8,opt,name=commit_sha,json=commitSha,proto3" json:"commit_sha,omitempty"`
+        Branch        string                 `protobuf:"bytes,9,opt,name=branch,proto3" json:"branch,omitempty"`
+        unknownFields protoimpl.UnknownFields
+        sizeCache     protoimpl.SizeCache
+}
+
+func (x *Job_BootstrapJob) Reset() <span class="cov0" title="0">{
+        *x = Job_BootstrapJob{}
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[15]
+        ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+        ms.StoreMessageInfo(mi)
+}</span>
+
+func (x *Job_BootstrapJob) String() string <span class="cov0" title="0">{
+        return protoimpl.X.MessageStringOf(x)
+}</span>
+
+func (*Job_BootstrapJob) ProtoMessage() {<span class="cov0" title="0">}</span>
+
+func (x *Job_BootstrapJob) ProtoReflect() protoreflect.Message <span class="cov0" title="0">{
+        mi := &amp;file_pkg_rpc_micro_ci_proto_msgTypes[15]
+        if x != nil </span><span class="cov0" title="0">{
+                ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+                if ms.LoadMessageInfo() == nil </span><span class="cov0" title="0">{
+                        ms.StoreMessageInfo(mi)
+                }</span>
+                <span class="cov0" title="0">return ms</span>
+        }
+        <span class="cov0" title="0">return mi.MessageOf(x)</span>
+}
+
+// Deprecated: Use Job_BootstrapJob.ProtoReflect.Descriptor instead.
+func (*Job_BootstrapJob) Descriptor() ([]byte, []int) <span class="cov0" title="0">{
+        return file_pkg_rpc_micro_ci_proto_rawDescGZIP(), []int{1, 1}
+}</span>
+
+func (x *Job_BootstrapJob) GetRepoUrl() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.RepoUrl
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job_BootstrapJob) GetCommitSha() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.CommitSha
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+func (x *Job_BootstrapJob) GetBranch() string <span class="cov0" title="0">{
+        if x != nil </span><span class="cov0" title="0">{
+                return x.Branch
+        }</span>
+        <span class="cov0" title="0">return ""</span>
+}
+
+var File_pkg_rpc_micro_ci_proto protoreflect.FileDescriptor
+
+const file_pkg_rpc_micro_ci_proto_rawDesc = "" +
+        "\n" +
+        "\x16pkg/rpc/micro-ci.proto\x12\bmicro_ci\"\xf7\x01\n" +
+        "\x04Step\x12\x12\n" +
+        "\x04name\x18\x01 \x01(\tR\x04name\x12\x1c\n" +
+        "\tcondition\x18\x02 \x01(\tR\tcondition\x12;\n" +
+        "\tvariables\x18\x03 \x03(\v2\x1d.micro_ci.Step.VariablesEntryR\tvariables\x12*\n" +
+        "\x11continue_on_error\x18\x04 \x01(\bR\x0fcontinueOnError\x12\x16\n" +
+        "\x06script\x18\x05 \x01(\tR\x06script\x1a&lt;\n" +
+        "\x0eVariablesEntry\x12\x10\n" +
+        "\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+        "\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x91\x04\n" +
+        "\x03Job\x12\x15\n" +
+        "\x06run_id\x18\x01 \x01(\tR\x05runId\x12\x12\n" +
+        "\x04name\x18\x02 \x01(\tR\x04name\x12&gt;\n" +
+        "\fpipeline_job\x18\x03 \x01(\v2\x19.micro_ci.Job.PipelineJobH\x00R\vpipelineJob\x12A\n" +
+        "\rbootstrap_job\x18\x04 \x01(\v2\x1a.micro_ci.Job.BootstrapJobH\x00R\fbootstrapJob\x1a\xed\x01\n" +
+        "\vPipelineJob\x12\x1c\n" +
+        "\tcondition\x18\x03 \x01(\tR\tcondition\x12F\n" +
+        "\tvariables\x18\x04 \x03(\v2(.micro_ci.Job.PipelineJob.VariablesEntryR\tvariables\x12\x14\n" +
+        "\x05image\x18\x05 \x01(\tR\x05image\x12$\n" +
+        "\x05steps\x18\x06 \x03(\v2\x0e.micro_ci.StepR\x05steps\x1a&lt;\n" +
+        "\x0eVariablesEntry\x12\x10\n" +
+        "\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+        "\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a`\n" +
+        "\fBootstrapJob\x12\x19\n" +
+        "\brepo_url\x18\a \x01(\tR\arepoUrl\x12\x1d\n" +
+        "\n" +
+        "commit_sha\x18\b \x01(\tR\tcommitSha\x12\x16\n" +
+        "\x06branch\x18\t \x01(\tR\x06branchB\n" +
+        "\n" +
+        "\bjob_type\"0\n" +
+        "\x0fRegisterRequest\x12\x1d\n" +
+        "\n" +
+        "machine_id\x18\x01 \x01(\tR\tmachineId\",\n" +
+        "\x10RegisterResponse\x12\x18\n" +
+        "\asuccess\x18\x01 \x01(\bR\asuccess\"2\n" +
+        "\x11UnregisterRequest\x12\x1d\n" +
+        "\n" +
+        "machine_id\x18\x01 \x01(\tR\tmachineId\".\n" +
+        "\x12UnregisterResponse\x12\x18\n" +
+        "\asuccess\x18\x01 \x01(\bR\asuccess\"0\n" +
+        "\x0fFetchJobRequest\x12\x1d\n" +
+        "\n" +
+        "machine_id\x18\x01 \x01(\tR\tmachineId\"3\n" +
+        "\x10FetchJobResponse\x12\x1f\n" +
+        "\x03job\x18\x01 \x01(\v2\r.micro_ci.JobR\x03job\"*\n" +
+        "\x0eAddJobResponse\x12\x18\n" +
+        "\asuccess\x18\x01 \x01(\bR\asuccess\"N\n" +
+        "\x16UpdateJobStatusRequest\x12\x1c\n" +
+        "\n" +
+        "job_run_id\x18\x01 \x01(\tR\bjobRunId\x12\x16\n" +
+        "\x06status\x18\x02 \x01(\tR\x06status\"3\n" +
+        "\x17UpdateJobStatusResponse\x12\x18\n" +
+        "\asuccess\x18\x01 \x01(\bR\asuccess\"L\n" +
+        "\x11StreamLogsRequest\x12\x1c\n" +
+        "\n" +
+        "job_run_id\x18\x01 \x01(\tR\bjobRunId\x12\x19\n" +
+        "\blog_data\x18\x02 \x01(\tR\alogData\".\n" +
+        "\x12StreamLogsResponse\x12\x18\n" +
+        "\asuccess\x18\x01 \x01(\bR\asuccess2\xac\x03\n" +
+        "\aMicroCI\x12A\n" +
+        "\bRegister\x12\x19.micro_ci.RegisterRequest\x1a\x1a.micro_ci.RegisterResponse\x12G\n" +
+        "\n" +
+        "Unregister\x12\x1b.micro_ci.UnregisterRequest\x1a\x1c.micro_ci.UnregisterResponse\x12A\n" +
+        "\bFetchJob\x12\x19.micro_ci.FetchJobRequest\x1a\x1a.micro_ci.FetchJobResponse\x121\n" +
+        "\x06AddJob\x12\r.micro_ci.Job\x1a\x18.micro_ci.AddJobResponse\x12V\n" +
+        "\x0fUpdateJobStatus\x12 .micro_ci.UpdateJobStatusRequest\x1a!.micro_ci.UpdateJobStatusResponse\x12G\n" +
+        "\n" +
+        "StreamLogs\x12\x1b.micro_ci.StreamLogsRequest\x1a\x1c.micro_ci.StreamLogsResponseB\x12Z\x10pkg/rpc/micro_cib\x06proto3"
+
+var (
+        file_pkg_rpc_micro_ci_proto_rawDescOnce sync.Once
+        file_pkg_rpc_micro_ci_proto_rawDescData []byte
+)
+
+func file_pkg_rpc_micro_ci_proto_rawDescGZIP() []byte <span class="cov0" title="0">{
+        file_pkg_rpc_micro_ci_proto_rawDescOnce.Do(func() </span><span class="cov0" title="0">{
+                file_pkg_rpc_micro_ci_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_pkg_rpc_micro_ci_proto_rawDesc), len(file_pkg_rpc_micro_ci_proto_rawDesc)))
+        }</span>)
+        <span class="cov0" title="0">return file_pkg_rpc_micro_ci_proto_rawDescData</span>
+}
+
+var file_pkg_rpc_micro_ci_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_pkg_rpc_micro_ci_proto_goTypes = []any{
+        (*Step)(nil),                    // 0: micro_ci.Step
+        (*Job)(nil),                     // 1: micro_ci.Job
+        (*RegisterRequest)(nil),         // 2: micro_ci.RegisterRequest
+        (*RegisterResponse)(nil),        // 3: micro_ci.RegisterResponse
+        (*UnregisterRequest)(nil),       // 4: micro_ci.UnregisterRequest
+        (*UnregisterResponse)(nil),      // 5: micro_ci.UnregisterResponse
+        (*FetchJobRequest)(nil),         // 6: micro_ci.FetchJobRequest
+        (*FetchJobResponse)(nil),        // 7: micro_ci.FetchJobResponse
+        (*AddJobResponse)(nil),          // 8: micro_ci.AddJobResponse
+        (*UpdateJobStatusRequest)(nil),  // 9: micro_ci.UpdateJobStatusRequest
+        (*UpdateJobStatusResponse)(nil), // 10: micro_ci.UpdateJobStatusResponse
+        (*StreamLogsRequest)(nil),       // 11: micro_ci.StreamLogsRequest
+        (*StreamLogsResponse)(nil),      // 12: micro_ci.StreamLogsResponse
+        nil,                             // 13: micro_ci.Step.VariablesEntry
+        (*Job_PipelineJob)(nil),         // 14: micro_ci.Job.PipelineJob
+        (*Job_BootstrapJob)(nil),        // 15: micro_ci.Job.BootstrapJob
+        nil,                             // 16: micro_ci.Job.PipelineJob.VariablesEntry
+}
+var file_pkg_rpc_micro_ci_proto_depIdxs = []int32{
+        13, // 0: micro_ci.Step.variables:type_name -&gt; micro_ci.Step.VariablesEntry
+        14, // 1: micro_ci.Job.pipeline_job:type_name -&gt; micro_ci.Job.PipelineJob
+        15, // 2: micro_ci.Job.bootstrap_job:type_name -&gt; micro_ci.Job.BootstrapJob
+        1,  // 3: micro_ci.FetchJobResponse.job:type_name -&gt; micro_ci.Job
+        16, // 4: micro_ci.Job.PipelineJob.variables:type_name -&gt; micro_ci.Job.PipelineJob.VariablesEntry
+        0,  // 5: micro_ci.Job.PipelineJob.steps:type_name -&gt; micro_ci.Step
+        2,  // 6: micro_ci.MicroCI.Register:input_type -&gt; micro_ci.RegisterRequest
+        4,  // 7: micro_ci.MicroCI.Unregister:input_type -&gt; micro_ci.UnregisterRequest
+        6,  // 8: micro_ci.MicroCI.FetchJob:input_type -&gt; micro_ci.FetchJobRequest
+        1,  // 9: micro_ci.MicroCI.AddJob:input_type -&gt; micro_ci.Job
+        9,  // 10: micro_ci.MicroCI.UpdateJobStatus:input_type -&gt; micro_ci.UpdateJobStatusRequest
+        11, // 11: micro_ci.MicroCI.StreamLogs:input_type -&gt; micro_ci.StreamLogsRequest
+        3,  // 12: micro_ci.MicroCI.Register:output_type -&gt; micro_ci.RegisterResponse
+        5,  // 13: micro_ci.MicroCI.Unregister:output_type -&gt; micro_ci.UnregisterResponse
+        7,  // 14: micro_ci.MicroCI.FetchJob:output_type -&gt; micro_ci.FetchJobResponse
+        8,  // 15: micro_ci.MicroCI.AddJob:output_type -&gt; micro_ci.AddJobResponse
+        10, // 16: micro_ci.MicroCI.UpdateJobStatus:output_type -&gt; micro_ci.UpdateJobStatusResponse
+        12, // 17: micro_ci.MicroCI.StreamLogs:output_type -&gt; micro_ci.StreamLogsResponse
+        12, // [12:18] is the sub-list for method output_type
+        6,  // [6:12] is the sub-list for method input_type
+        6,  // [6:6] is the sub-list for extension type_name
+        6,  // [6:6] is the sub-list for extension extendee
+        0,  // [0:6] is the sub-list for field type_name
+}
+
+func init() <span class="cov0" title="0">{ file_pkg_rpc_micro_ci_proto_init() }</span>
+func file_pkg_rpc_micro_ci_proto_init() <span class="cov0" title="0">{
+        if File_pkg_rpc_micro_ci_proto != nil </span><span class="cov0" title="0">{
+                return
+        }</span>
+        <span class="cov0" title="0">file_pkg_rpc_micro_ci_proto_msgTypes[1].OneofWrappers = []any{
+                (*Job_PipelineJob_)(nil),
+                (*Job_BootstrapJob_)(nil),
+        }
+        type x struct{}
+        out := protoimpl.TypeBuilder{
+                File: protoimpl.DescBuilder{
+                        GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
+                        RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_rpc_micro_ci_proto_rawDesc), len(file_pkg_rpc_micro_ci_proto_rawDesc)),
+                        NumEnums:      0,
+                        NumMessages:   17,
+                        NumExtensions: 0,
+                        NumServices:   1,
+                },
+                GoTypes:           file_pkg_rpc_micro_ci_proto_goTypes,
+                DependencyIndexes: file_pkg_rpc_micro_ci_proto_depIdxs,
+                MessageInfos:      file_pkg_rpc_micro_ci_proto_msgTypes,
+        }.Build()
+        File_pkg_rpc_micro_ci_proto = out.File
+        file_pkg_rpc_micro_ci_proto_goTypes = nil
+        file_pkg_rpc_micro_ci_proto_depIdxs = nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">// Code generated by protoc-gen-go-grpc. DO NOT EDIT.
+// versions:
+// - protoc-gen-go-grpc v1.5.1
+// - protoc             v6.32.0
+// source: pkg/rpc/micro-ci.proto
+
+package micro_ci
+
+import (
+        context "context"
+        grpc "google.golang.org/grpc"
+        codes "google.golang.org/grpc/codes"
+        status "google.golang.org/grpc/status"
+)
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+// Requires gRPC-Go v1.64.0 or later.
+const _ = grpc.SupportPackageIsVersion9
+
+const (
+        MicroCI_Register_FullMethodName        = "/micro_ci.MicroCI/Register"
+        MicroCI_Unregister_FullMethodName      = "/micro_ci.MicroCI/Unregister"
+        MicroCI_FetchJob_FullMethodName        = "/micro_ci.MicroCI/FetchJob"
+        MicroCI_AddJob_FullMethodName          = "/micro_ci.MicroCI/AddJob"
+        MicroCI_UpdateJobStatus_FullMethodName = "/micro_ci.MicroCI/UpdateJobStatus"
+        MicroCI_StreamLogs_FullMethodName      = "/micro_ci.MicroCI/StreamLogs"
+)
+
+// MicroCIClient is the client API for MicroCI service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// Service definition
+type MicroCIClient interface {
+        // Register a new runner with the CI server
+        Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
+        // Unregister a runner from the CI server
+        Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error)
+        // Fetch a job for the registered runner to execute
+        FetchJob(ctx context.Context, in *FetchJobRequest, opts ...grpc.CallOption) (*FetchJobResponse, error)
+        AddJob(ctx context.Context, in *Job, opts ...grpc.CallOption) (*AddJobResponse, error)
+        // Update the status of a job
+        UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error)
+        // Stream logs from the runner to the CI server
+        StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (*StreamLogsResponse, error)
+}
+
+type microCIClient struct {
+        cc grpc.ClientConnInterface
+}
+
+func NewMicroCIClient(cc grpc.ClientConnInterface) MicroCIClient <span class="cov0" title="0">{
+        return &amp;microCIClient{cc}
+}</span>
+
+func (c *microCIClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(RegisterResponse)
+        err := c.cc.Invoke(ctx, MicroCI_Register_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *microCIClient) Unregister(ctx context.Context, in *UnregisterRequest, opts ...grpc.CallOption) (*UnregisterResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(UnregisterResponse)
+        err := c.cc.Invoke(ctx, MicroCI_Unregister_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *microCIClient) FetchJob(ctx context.Context, in *FetchJobRequest, opts ...grpc.CallOption) (*FetchJobResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(FetchJobResponse)
+        err := c.cc.Invoke(ctx, MicroCI_FetchJob_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *microCIClient) AddJob(ctx context.Context, in *Job, opts ...grpc.CallOption) (*AddJobResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(AddJobResponse)
+        err := c.cc.Invoke(ctx, MicroCI_AddJob_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *microCIClient) UpdateJobStatus(ctx context.Context, in *UpdateJobStatusRequest, opts ...grpc.CallOption) (*UpdateJobStatusResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(UpdateJobStatusResponse)
+        err := c.cc.Invoke(ctx, MicroCI_UpdateJobStatus_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+func (c *microCIClient) StreamLogs(ctx context.Context, in *StreamLogsRequest, opts ...grpc.CallOption) (*StreamLogsResponse, error) <span class="cov0" title="0">{
+        cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+        out := new(StreamLogsResponse)
+        err := c.cc.Invoke(ctx, MicroCI_StreamLogs_FullMethodName, in, out, cOpts...)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return out, nil</span>
+}
+
+// MicroCIServer is the server API for MicroCI service.
+// All implementations must embed UnimplementedMicroCIServer
+// for forward compatibility.
+//
+// Service definition
+type MicroCIServer interface {
+        // Register a new runner with the CI server
+        Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
+        // Unregister a runner from the CI server
+        Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error)
+        // Fetch a job for the registered runner to execute
+        FetchJob(context.Context, *FetchJobRequest) (*FetchJobResponse, error)
+        AddJob(context.Context, *Job) (*AddJobResponse, error)
+        // Update the status of a job
+        UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error)
+        // Stream logs from the runner to the CI server
+        StreamLogs(context.Context, *StreamLogsRequest) (*StreamLogsResponse, error)
+        mustEmbedUnimplementedMicroCIServer()
+}
+
+// UnimplementedMicroCIServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedMicroCIServer struct{}
+
+func (UnimplementedMicroCIServer) Register(context.Context, *RegisterRequest) (*RegisterResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
+}</span>
+func (UnimplementedMicroCIServer) Unregister(context.Context, *UnregisterRequest) (*UnregisterResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method Unregister not implemented")
+}</span>
+func (UnimplementedMicroCIServer) FetchJob(context.Context, *FetchJobRequest) (*FetchJobResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method FetchJob not implemented")
+}</span>
+func (UnimplementedMicroCIServer) AddJob(context.Context, *Job) (*AddJobResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method AddJob not implemented")
+}</span>
+func (UnimplementedMicroCIServer) UpdateJobStatus(context.Context, *UpdateJobStatusRequest) (*UpdateJobStatusResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method UpdateJobStatus not implemented")
+}</span>
+func (UnimplementedMicroCIServer) StreamLogs(context.Context, *StreamLogsRequest) (*StreamLogsResponse, error) <span class="cov0" title="0">{
+        return nil, status.Errorf(codes.Unimplemented, "method StreamLogs not implemented")
+}</span>
+func (UnimplementedMicroCIServer) mustEmbedUnimplementedMicroCIServer() {<span class="cov0" title="0">}</span>
+func (UnimplementedMicroCIServer) testEmbeddedByValue()                 {<span class="cov0" title="0">}</span>
+
+// UnsafeMicroCIServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MicroCIServer will
+// result in compilation errors.
+type UnsafeMicroCIServer interface {
+        mustEmbedUnimplementedMicroCIServer()
+}
+
+func RegisterMicroCIServer(s grpc.ServiceRegistrar, srv MicroCIServer) <span class="cov0" title="0">{
+        // If the following call pancis, it indicates UnimplementedMicroCIServer was
+        // embedded by pointer and is nil.  This will cause panics if an
+        // unimplemented method is ever invoked, so we test this at initialization
+        // time to prevent it from happening at runtime later due to I/O.
+        if t, ok := srv.(interface{ testEmbeddedByValue() }); ok </span><span class="cov0" title="0">{
+                t.testEmbeddedByValue()
+        }</span>
+        <span class="cov0" title="0">s.RegisterService(&amp;MicroCI_ServiceDesc, srv)</span>
+}
+
+func _MicroCI_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(RegisterRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).Register(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_Register_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).Register(ctx, req.(*RegisterRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _MicroCI_Unregister_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(UnregisterRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).Unregister(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_Unregister_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).Unregister(ctx, req.(*UnregisterRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _MicroCI_FetchJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(FetchJobRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).FetchJob(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_FetchJob_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).FetchJob(ctx, req.(*FetchJobRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _MicroCI_AddJob_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(Job)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).AddJob(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_AddJob_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).AddJob(ctx, req.(*Job))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _MicroCI_UpdateJobStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(UpdateJobStatusRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).UpdateJobStatus(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_UpdateJobStatus_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).UpdateJobStatus(ctx, req.(*UpdateJobStatusRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+func _MicroCI_StreamLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) <span class="cov0" title="0">{
+        in := new(StreamLogsRequest)
+        if err := dec(in); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">if interceptor == nil </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).StreamLogs(ctx, in)
+        }</span>
+        <span class="cov0" title="0">info := &amp;grpc.UnaryServerInfo{
+                Server:     srv,
+                FullMethod: MicroCI_StreamLogs_FullMethodName,
+        }
+        handler := func(ctx context.Context, req interface{}) (interface{}, error) </span><span class="cov0" title="0">{
+                return srv.(MicroCIServer).StreamLogs(ctx, req.(*StreamLogsRequest))
+        }</span>
+        <span class="cov0" title="0">return interceptor(ctx, in, info, handler)</span>
+}
+
+// MicroCI_ServiceDesc is the grpc.ServiceDesc for MicroCI service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var MicroCI_ServiceDesc = grpc.ServiceDesc{
+        ServiceName: "micro_ci.MicroCI",
+        HandlerType: (*MicroCIServer)(nil),
+        Methods: []grpc.MethodDesc{
+                {
+                        MethodName: "Register",
+                        Handler:    _MicroCI_Register_Handler,
+                },
+                {
+                        MethodName: "Unregister",
+                        Handler:    _MicroCI_Unregister_Handler,
+                },
+                {
+                        MethodName: "FetchJob",
+                        Handler:    _MicroCI_FetchJob_Handler,
+                },
+                {
+                        MethodName: "AddJob",
+                        Handler:    _MicroCI_AddJob_Handler,
+                },
+                {
+                        MethodName: "UpdateJobStatus",
+                        Handler:    _MicroCI_UpdateJobStatus_Handler,
+                },
+                {
+                        MethodName: "StreamLogs",
+                        Handler:    _MicroCI_StreamLogs_Handler,
+                },
+        },
+        Streams:  []grpc.StreamDesc{},
+        Metadata: "pkg/rpc/micro-ci.proto",
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
