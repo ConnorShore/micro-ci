@@ -64,6 +64,7 @@ func (r *BootstrapRunner) Run(j common.Job) error {
 	return nil
 }
 
+// Setup a container to run bootstrap job
 func (r *BootstrapRunner) setupContainerForBootstrapJob() (*DockerContainer, error) {
 	options := DockerContainerOptions{
 		Image:      DefaultImage,
@@ -74,12 +75,13 @@ func (r *BootstrapRunner) setupContainerForBootstrapJob() (*DockerContainer, err
 	return r.createAndStartDockerContainer(options)
 }
 
+// Prepares the repo to be cloned in the container
 func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *common.BootstrapJob) error {
 	// Install git in container
 	log.Printf("Installing git")
 	script := "apk update && apk add git"
 	if err := r.executeCommand(script, container.ID, j.RunId); err != nil {
-		return fmt.Errorf("Failed to initialize git: %v", err)
+		return fmt.Errorf("failed to initialize git: %v", err)
 	}
 
 	// Clone repository for specific sha or branch
@@ -92,6 +94,7 @@ func (r *BootstrapRunner) prepareRepoInContainer(container *DockerContainer, j *
 	return nil
 }
 
+// Retrieves the pipeline file data from the container
 func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *common.BootstrapJob) ([][]byte, error) {
 	// Extract pipeline file data so we can parse it
 	log.Printf("Extracting pipelineFiles")
@@ -128,6 +131,7 @@ func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *com
 	return pipelineData, nil
 }
 
+// Parse pipelines and submit jobs to queue on server
 func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) error {
 	// Parse pipeline files to pipeline objects
 	var wg sync.WaitGroup

@@ -62,6 +62,7 @@ func NewMachine(name string, mciClient mciClient.MicroCIClient, executor executo
 	}, nil
 }
 
+// Runs the machine until stop signal is triggered
 func (m *Machine) Run() error {
 	parentCtx := context.Background()
 	defer func(ctx context.Context) error {
@@ -102,7 +103,8 @@ func (m *Machine) Run() error {
 	}
 }
 
-func (m *Machine) RegisterRunner(t common.JobType) error {
+// Registers a job type for machine to be able to handle
+func (m *Machine) RegisterJobType(t common.JobType) error {
 	v, ok := m.runners[t]
 	if ok {
 		return fmt.Errorf("already registered a runner of type [%v] with machine [%v]: %+v", t, m.Name, v)
@@ -118,10 +120,12 @@ func (m *Machine) RegisterRunner(t common.JobType) error {
 	return nil
 }
 
+// Shutdown the machine
 func (m *Machine) Shutdown() {
 	close(m.shutdown)
 }
 
+// Polls the server for jobs to run
 func (m *Machine) pollForJobs() {
 	log.Printf("Machine [%v] polling for job...\n", m.Name)
 
@@ -148,47 +152,25 @@ func (m *Machine) pollForJobs() {
 	}
 }
 
+// Prepares machine and runs the job
 func (m *Machine) runJob(j common.Job) error {
-	fmt.Printf("Running job: %v\n", j.GetName())
+	fmt.Printf("Running job [%v] on machine [%v]\n", j.GetName(), m.Name)
 
 	m.State = common.StateBusy
 	defer func() {
 		m.State = common.StateIdle
 	}()
 
-	// Set job to running
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	err := m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusRunning)
-	if err != nil {
-		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
+	if err := m.updateJobStatusRunning(j.GetRunId()); err != nil {
+		return err
 	}
 
 	// Run job with the proper runner
-	err = m.runJobWithRunner(j)
-	if err != nil {
+	if err := m.runJobWithRunner(j); err != nil {
 		return fmt.Errorf("failed to run job [%v] with runner", j.GetName())
 	}
 
-	// Update job status based on completion
-	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	var status common.JobStatus
-	success := true
-	if success {
-		err = m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusSuccess)
-		status = common.StatusSuccess
-	} else {
-		err = m.mciClient.UpdateJobStatus(ctx, j.GetRunId(), common.StatusFailed)
-		status = common.StatusFailed
-	}
-	if err != nil {
-		return fmt.Errorf("failed to update job status to %v: %v", status, err)
-	}
-
-	return nil
+	return m.updateJobStatusFinished(j.GetRunId())
 }
 
 // spins up a container and runs the job's steps. will stop/remove container once finished
@@ -200,4 +182,41 @@ func (m *Machine) runJobWithRunner(j common.Job) error {
 	}
 
 	return runner.Run(j)
+}
+
+// Updates job status to running
+func (m *Machine) updateJobStatusRunning(runId string) error {
+	// Set job to running
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := m.mciClient.UpdateJobStatus(ctx, runId, common.StatusRunning)
+	if err != nil {
+		return fmt.Errorf("failed to update job status to %v: %v", common.StatusRunning, err)
+	}
+
+	return nil
+}
+
+// Updates job status based on finished job result
+func (m *Machine) updateJobStatusFinished(runId string) error {
+	// Update job status based on completion
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var err error
+	var status common.JobStatus
+	success := true
+	if success {
+		err = m.mciClient.UpdateJobStatus(ctx, runId, common.StatusSuccess)
+		status = common.StatusSuccess
+	} else {
+		err = m.mciClient.UpdateJobStatus(ctx, runId, common.StatusFailed)
+		status = common.StatusFailed
+	}
+	if err != nil {
+		return fmt.Errorf("failed to update job status to %v: %v", status, err)
+	}
+
+	return nil
 }

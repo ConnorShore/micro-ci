@@ -26,11 +26,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Register job runner types with machine
-	if err := machine1.RegisterRunner(common.TypeBootstrap); err != nil {
+	// Register job types with machine
+	if err := machine1.RegisterJobType(common.TypeBootstrap); err != nil {
 		log.Fatal(err)
 	}
-	if err := machine1.RegisterRunner(common.TypePipeline); err != nil {
+	if err := machine1.RegisterJobType(common.TypePipeline); err != nil {
 		log.Fatal(err)
 	}
 

@@ -91,7 +91,7 @@ func (r *PipelineRunner) runAllSteps(ctx context.Context, j *pipeline.Job, id st
 	return nil
 }
 
-// runs an individual step in a job
+// Runs an individual step in a job
 func (r *PipelineRunner) runStep(ctx context.Context, s pipeline.Step, vars common.VariableMap, containerID, jobRunId string) (bool, error) {
 	if err := r.executor.Execute(executor.ExecutorOpts{
 		Ctx:           ctx,
