@@ -157,6 +157,8 @@ func (r *BootstrapRunner) parseAndSubmitPipelineJobs(pipelineData [][]byte) erro
 
 			// Extract jobs from pipleine
 			for _, j := range p.Jobs {
+				j.Variables = common.MergeVariables(p.Variables, j.Variables) // add pipeline vars to job vars
+
 				jobCh <- j
 			}
 		}(d, jobCh)
