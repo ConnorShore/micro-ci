@@ -2,6 +2,7 @@ package executor
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os/exec"
 	"syscall"
@@ -17,12 +18,18 @@ func NewDockerShellExecutor() Executor {
 
 func (e *DockerShellExecutor) Execute(opts ExecutorOpts, onStdOut func(line string)) error {
 	commandVars := []string{"exec"}
+
 	for key, val := range opts.Vars {
 		ev := key + "=" + val
 		commandVars = append(commandVars, "-e", ev)
 	}
 
-	commandVars = append(commandVars, opts.EnvironmentId, "sh", "-c", makeSingleLineScript(opts.Script))
+	script := makeSingleLineScript(opts.Script)
+	if opts.WorkingDir != "" {
+		script = fmt.Sprintf("cd %s && %s", opts.WorkingDir, script)
+	}
+
+	commandVars = append(commandVars, opts.EnvironmentId, "sh", "-c", script)
 	cmd := exec.CommandContext(opts.Ctx, "docker", commandVars...)
 
 	// Set a process group ID to ensure cleanup of child processes if the context is canceled.

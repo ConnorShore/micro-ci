@@ -82,7 +82,7 @@ func (r *PipelineRunner) runAllSteps(ctx context.Context, j *pipeline.Job, id st
 
 		_, err = r.runStep(ctx, s, common.MergeVariables(j.Variables, s.Variables), id, j.RunId)
 		if err != nil && !s.ContinueOnError {
-			log.Printf("Exiting due to error on step [%v+]\n", s)
+			log.Printf("Exiting due to error on step [%v]: %v\n", s.Name, err)
 			return err
 		}
 		fmt.Println(strings.Repeat("-", 60))
@@ -98,6 +98,7 @@ func (r *PipelineRunner) runStep(ctx context.Context, s pipeline.Step, vars comm
 		Script:        s.Script,
 		Vars:          vars,
 		EnvironmentId: containerID,
+		WorkingDir:    DefaultCloneDir,
 	}, func(line string) {
 		fmt.Printf("[Runner: %v] Execute pipeline job log: %v\n", r.ID, line)
 		r.mciClient.StreamLogs(ctx, jobRunId, line)

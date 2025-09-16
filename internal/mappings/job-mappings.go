@@ -80,7 +80,6 @@ func convertProtoJobToPipelineJob(j *micro_ci.Job) (*pipeline.Job, error) {
 
 // Converts a pipeline job to a proto (rpc) job
 func convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
-	fmt.Printf("Converting pipeline job [%+v] to proto job\n", *j)
 	var steps []*micro_ci.Step
 	for _, s := range j.Steps {
 		ps := &micro_ci.Step{
@@ -112,7 +111,6 @@ func convertPipelineJobToProtoJob(j *pipeline.Job) *micro_ci.Job {
 
 // Converts a bootstrap job to a proto (rpc) job
 func convertBootstrapJobToProtoJob(j *common.BootstrapJob) *micro_ci.Job {
-	fmt.Printf("Converting bootstrap job [%+v] to proto job\n", *j)
 	var bootstrapJob = &micro_ci.Job_BootstrapJob{
 		RepoUrl:   j.RepoURL,
 		CommitSha: j.CommitSha,

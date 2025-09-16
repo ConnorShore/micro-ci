@@ -13,6 +13,7 @@ type ExecutorOpts struct {
 	EnvironmentId string
 	Script        pipeline.Script
 	Vars          common.VariableMap
+	WorkingDir    string
 }
 
 type Executor interface {

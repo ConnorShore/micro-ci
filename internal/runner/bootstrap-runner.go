@@ -100,8 +100,9 @@ func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *com
 	// Extract pipeline file data so we can parse it
 	log.Printf("Extracting pipelineFiles")
 
+	// Get all the pipeline files from the pipeline directory
 	var pipelineFiles []string
-	script := fmt.Sprintf("cd %s/%s && ls", DefaultCloneDir, pipeline.PipelineDir)
+	script := fmt.Sprintf("find %s/%s -type f", DefaultCloneDir, pipeline.PipelineDir)
 	if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) {
 		pipelineFiles = append(pipelineFiles, line)
 	}); err != nil {
@@ -109,11 +110,12 @@ func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *com
 	}
 
 	// Get content of bytes in the pipeline files
-	log.Println("Parsing pipeline files")
+	log.Printf("Parsing [%v] pipeline files: %+v\n", len(pipelineFiles), pipelineFiles)
 
 	var pipelineData [][]byte
 	for _, f := range pipelineFiles {
-		script = fmt.Sprintf("cat %s/%s/%s", DefaultCloneDir, pipeline.PipelineDir, f)
+		// script = fmt.Sprintf("cat %s/%s/%s", DefaultCloneDir, pipeline.PipelineDir, f)
+		script = fmt.Sprintf("cat %s", f)
 		var data []byte
 		if err := r.executeCommandWithOut(context.Background(), script, container.ID, func(line string) {
 			data = append(data, []byte(line)...)
@@ -125,6 +127,7 @@ func (r *BootstrapRunner) extractPipelineData(container *DockerContainer, j *com
 		pipelineData = append(pipelineData, data)
 	}
 
+	log.Printf("Successfully parsed [%v] pipeline files\n", len(pipelineData))
 	return pipelineData, nil
 }
 
