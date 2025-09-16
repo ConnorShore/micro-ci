@@ -13,10 +13,6 @@ import (
 	"github.com/ConnorShore/micro-ci/internal/runner/executor"
 )
 
-// TODO:
-//		1. Add additional pipelines in test repo to see if multiple pipelines work
-//		2. Look into adding unit tests for stuff
-
 func main() {
 	executor := executor.NewDockerShellExecutor()
 

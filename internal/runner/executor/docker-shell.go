@@ -59,6 +59,10 @@ func (e *DockerShellExecutor) Execute(opts ExecutorOpts, onStdOut func(line stri
 		onStdOut(scanner.Text())
 	}
 
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
 	// Wait for the command to finish and return its result.
 	return cmd.Wait()
 }
