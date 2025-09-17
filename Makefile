@@ -7,8 +7,8 @@ cleanServer:
 	echo "Cleaned up the 'bin' directory."
 
 cleanTest:
-	rm -rf test/out &
-	echo "Cleaned up the 'test/out' directory."
+	rm -rf bin/test &
+	echo "Cleaned up the 'bin/test' directory."
 
 clean: cleanRunner cleanServer cleanTest
 	echo "Cleaned up all build artifacts for Micro CI server and runner."
@@ -45,12 +45,12 @@ test:
 
 coverage:
 	@echo "Running tests with coverage report..."
-	mkdir -p test/out
-	go test -v ./... -coverprofile=test/out/coverage.out
-	go tool cover -html=test/out/coverage.out -o test/out/coverage.html
-	echo "Coverage report generated at test/out/coverage.html."
+	mkdir -p bin/test
+	go test -v ./... -coverprofile=bin/test/coverage.out
+	go tool cover -html=bin/test/coverage.out -o bin/test/coverage.html
+	echo "Coverage report generated at bin/test/coverage.html."
 	echo "Launching coverage report..."
-	open test/out/coverage.html
+	open bin/test/coverage.html
 
 
 buildAndTest: build test

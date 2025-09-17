@@ -2,6 +2,8 @@ package client
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 
 	"github.com/ConnorShore/micro-ci/internal/common"
 	"github.com/ConnorShore/micro-ci/internal/mappings"
@@ -17,6 +19,10 @@ type grpcClient struct {
 }
 
 func NewGrpcClient(serverAddr string) (MicroCIClient, error) {
+	if _, err := url.Parse(serverAddr); err != nil {
+		return nil, fmt.Errorf("invalid server address: %v", err)
+	}
+
 	opts := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	}
